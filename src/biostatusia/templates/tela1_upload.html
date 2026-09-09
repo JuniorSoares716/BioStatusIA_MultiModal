@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BioStatusIA — Upload e Detecção</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: { extend: {
+      colors: {
+        "surface-dim": "#cfdaf2", "on-secondary-container": "#266d68", "on-surface": "#111c2d",
+        "surface-container-high": "#dee8ff", "on-error": "#ffffff", "primary-fixed": "#9cf2e8",
+        "surface-container": "#e7eeff", "secondary": "#216963", "secondary-container": "#a8ece5",
+        "tertiary": "#7d4200", "tertiary-container": "#a15600", "on-tertiary": "#ffffff",
+        "surface-bright": "#f9f9ff", "on-secondary": "#ffffff", "primary": "#005c55",
+        "surface-container-low": "#f0f3ff", "surface": "#f9f9ff", "on-background": "#111c2d",
+        "primary-fixed-dim": "#80d5cb", "inverse-surface": "#263143", "surface-variant": "#d8e3fb",
+        "tertiary-fixed": "#ffdcc3", "surface-container-lowest": "#ffffff", "background": "#f9f9ff",
+        "outline": "#6e7977", "primary-container": "#0f766e", "inverse-primary": "#80d5cb",
+        "surface-container-highest": "#d8e3fb", "error": "#ba1a1a", "surface-tint": "#006a63",
+        "outline-variant": "#bdc9c6", "on-surface-variant": "#3e4947", "on-tertiary-fixed": "#2f1500",
+        "error-container": "#ffdad6", "on-error-container": "#93000a", "on-primary": "#ffffff",
+        "on-primary-container": "#a3faef", "on-tertiary-container": "#ffe6d5"
+      },
+      borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      spacing: { "card-gap": "20px", "gutter": "16px", "container-padding": "24px" },
+      fontFamily: { "sans": ["Inter"] }
+    } }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .drop-zone-active { background-color: rgba(15,118,110,.08); border-style: solid !important; transform: scale(1.01); }
+  #loading { display: none; }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col" style="font-family:Inter,sans-serif">
+
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 bg-primary-container shadow-sm h-16">
+  <div class="flex items-center gap-8">
+    <span class="text-xl font-bold text-on-primary-container">🧬 BioStatusIA</span>
+    <div class="hidden md:flex items-center gap-6 text-sm">
+      <a class="text-on-primary-container font-bold border-b-2 border-on-primary-container pb-1" href="/">Dashboard</a>
+      <a class="text-on-primary-container/80 hover:text-on-primary-container transition-colors" href="/historico">Histórico</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-4 text-on-primary-container">
+    <button type="button" class="p-2 hover:bg-primary/10 rounded-full transition-all"><span class="material-symbols-outlined">notifications</span></button>
+    <button type="button" class="p-2 hover:bg-primary/10 rounded-full transition-all"><span class="material-symbols-outlined">account_circle</span></button>
+  </div>
+</nav>
+
+<main class="flex-grow pt-24 pb-12 px-6">
+<div class="max-w-[900px] mx-auto">
+
+  <!-- Ethical Banner -->
+  <div class="mb-10 p-4 bg-tertiary-fixed border border-tertiary-container rounded-lg flex gap-3 items-start shadow-sm">
+    <span class="material-symbols-outlined text-tertiary-container mt-0.5">warning</span>
+    <p class="text-on-tertiary-fixed text-sm">Esta é uma ferramenta de suporte à decisão baseada em IA e não substitui o diagnóstico clínico realizado por um médico. Use os resultados como apoio complementar.</p>
+  </div>
+
+  <!-- Page Header -->
+  <div class="mb-10 text-center">
+    <h1 class="text-3xl font-semibold text-primary mb-2 tracking-tight">Envie seus dados biomédicos</h1>
+    <p class="text-on-surface-variant text-base">Carregue exames ou séries temporais. Nossa IA detectará automaticamente a modalidade do sinal.</p>
+  </div>
+
+  <!-- Main Interaction Card -->
+  <form id="form-analise" action="/analisar" method="POST" enctype="multipart/form-data"
+        class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm">
+
+    <!-- Drag & Drop Zone -->
+    <div class="relative group cursor-pointer border-2 border-dashed border-primary-container rounded-xl p-12 text-center transition-all duration-300 hover:bg-primary/5 mb-8" id="drop-zone"
+         onclick="document.getElementById('arquivo').click()">
+      <input id="arquivo" name="arquivo" type="file" class="absolute inset-0 opacity-0 cursor-pointer" onchange="mostrarNome(this)"
+             accept=".zip,.tar.gz,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.csv,.txt,.tsv,.edf,.bdf,.dat,.hea,.mat,.dcm,.nii,.gz,.mha"/>
+      <div class="flex flex-col items-center pointer-events-none">
+        <div class="w-16 h-16 bg-primary-fixed rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
+        </div>
+        <h3 class="text-xl font-semibold text-on-surface mb-1">Arraste um arquivo, ZIP ou pasta aqui</h3>
+        <p class="text-on-surface-variant">ou clique para selecionar do seu computador</p>
+        <p id="nome-arquivo" class="text-primary text-sm mt-3 font-semibold hidden"></p>
+      </div>
+    </div>
+
+    <!-- Input Fields Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap mb-8">
+      <!-- Local Path -->
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-semibold tracking-wider text-on-surface-variant uppercase">Caminho local da pasta</label>
+        <div class="flex">
+          <input id="caminho_manual" name="caminho_manual" class="flex-grow bg-surface border border-outline-variant rounded-l-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: C:\Users\clinica\exames\hoje" type="text"/>
+          <button type="submit" class="bg-primary text-on-primary px-4 py-2 rounded-r-lg text-xs font-semibold hover:opacity-90 transition-opacity">Usar caminho</button>
+        </div>
+      </div>
+      <!-- Signal Selector -->
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-semibold tracking-wider text-on-surface-variant uppercase">Tipo de sinal (para séries temporais)</label>
+        <select id="tipo_sinal" name="tipo_sinal" class="bg-surface border border-outline-variant rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary outline-none text-sm appearance-none">
+          <option value="auto">Auto-detecção (Recomendado)</option>
+          <option value="ECG">ECG - Eletrocardiograma</option>
+          <option value="EEG">EEG - Eletroencefalograma</option>
+          <option value="EMG">EMG - Eletromiografia</option>
+          <option value="EOG">EOG - Eletro-oculografia</option>
+          <option value="PPG">PPG - Fotopletismografia</option>
+          <option value="PA">PA - Pressão Arterial</option>
+          <option value="Espirometria">Espirometria</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Kaggle Integration -->
+    <div class="p-4 bg-surface-container rounded-lg mb-10 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-secondary">database</span>
+        <span class="text-sm text-on-surface">Ou usar dataset de exemplo (KaggleHub)</span>
+      </div>
+      <div class="flex flex-grow max-w-sm flex-col">
+        <div class="flex">
+          <input id="kaggle_id" name="kaggle_id" class="flex-grow bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary outline-none text-sm" placeholder="ID do dataset (ex: 'paultimothymooney/chest-xray-pneumonia')" type="text"/>
+        </div>
+        <p id="kaggle-hint" class="text-[11px] mt-1 hidden"></p>
+      </div>
+    </div>
+
+    <!-- Supported Types Badges -->
+    <div class="mb-10">
+      <h4 class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-4">Tipos suportados</h4>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="flex flex-col items-center p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors">
+          <span class="material-symbols-outlined text-primary mb-2">image</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">Imagem<br/><span class="opacity-60">PNG/JPG/TIF</span></span>
+        </div>
+        <div class="flex flex-col items-center p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors">
+          <span class="material-symbols-outlined text-primary mb-2">table_chart</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">Tabular<br/><span class="opacity-60">CSV/TXT/TSV</span></span>
+        </div>
+        <div class="flex flex-col items-center p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors">
+          <span class="material-symbols-outlined text-primary mb-2">vital_signs</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">F1 — Sinais<br/><span class="opacity-60">EDF/MAT/HEA</span></span>
+        </div>
+        <div class="flex flex-col items-center p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors">
+          <span class="material-symbols-outlined text-primary mb-2">view_in_ar</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">F3 — DICOM<br/><span class="opacity-60">2D Slices</span></span>
+        </div>
+        <div class="flex flex-col items-center p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors">
+          <span class="material-symbols-outlined text-primary mb-2">layers</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">F4 — Volume<br/><span class="opacity-60">3D NIfTI</span></span>
+        </div>
+        <div class="flex flex-col items-center p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors">
+          <span class="material-symbols-outlined text-primary mb-2">account_tree</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">Multimodal<br/><span class="opacity-60">Mixed Data</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Button -->
+    <button type="submit"
+            class="w-full bg-primary-container text-on-primary-container text-xl font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all active:scale-100 flex items-center justify-center gap-3">
+      <span class="material-symbols-outlined">analytics</span> Analisar
+    </button>
+  </form>
+
+  <!-- History link -->
+  <div class="mt-12 text-center">
+    <a class="inline-flex items-center gap-2 text-primary text-sm font-medium hover:underline" href="/historico">
+      <span class="material-symbols-outlined">history</span> Ver histórico de análises recentes
+    </a>
+  </div>
+</div>
+</main>
+
+<!-- Modal de validação (campo inválido / link errado) -->
+<div id="modal-validacao" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] items-center justify-center p-4" style="display:none">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-outline-variant">
+    <div class="flex items-start gap-4 mb-4">
+      <div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-on-error-container">error</span>
+      </div>
+      <div class="flex-grow">
+        <h3 id="modal-titulo" class="text-lg font-bold text-on-surface">Campo inválido</h3>
+        <p id="modal-mensagem" class="text-sm text-on-surface-variant mt-1"></p>
+      </div>
+    </div>
+
+    <div id="modal-valor-informado-box" class="mb-3 hidden">
+      <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Você digitou</p>
+      <p id="modal-valor-informado" class="text-sm font-mono bg-error-container/40 text-on-error-container px-3 py-2 rounded-lg break-all"></p>
+    </div>
+
+    <div id="modal-exemplo-box" class="mb-5 hidden">
+      <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Formato correto</p>
+      <p id="modal-exemplo" class="text-sm font-mono bg-secondary-container/50 text-on-secondary-container px-3 py-2 rounded-lg break-all"></p>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <button id="modal-btn-corrigir" type="button" class="hidden px-4 py-2 rounded-lg text-sm font-semibold bg-primary-container text-on-primary-container hover:opacity-90 transition-opacity">
+        Corrigir automaticamente
+      </button>
+      <button id="modal-btn-fechar" type="button" class="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">
+        Entendi
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmação — base multimodal e/ou escolha de coluna-alvo -->
+<div id="modal-multimodal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] items-center justify-center p-4" style="display:none">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-outline-variant">
+    <div class="flex items-start gap-4 mb-4">
+      <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-on-secondary-container">account_tree</span>
+      </div>
+      <div class="flex-grow">
+        <h3 id="mm-titulo-modal" class="text-lg font-bold text-on-surface">Confirme antes de analisar</h3>
+        <p id="mm-subtitulo-modal" class="text-sm text-on-surface-variant mt-1"></p>
+      </div>
+    </div>
+
+    <div id="mm-secao-modalidades" class="mb-4">
+      <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-2">Tipos de dado encontrados</p>
+      <div id="mm-lista-modalidades" class="space-y-2"></div>
+    </div>
+
+    <div id="mm-alinhamento-box" class="mb-5 rounded-xl p-4 border">
+      <p id="mm-alinhamento-titulo" class="text-sm font-bold mb-1"></p>
+      <p id="mm-alinhamento-texto" class="text-sm"></p>
+    </div>
+
+    <div id="mm-secao-coluna-alvo" class="mb-5">
+      <label for="mm-select-coluna-alvo" class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide mb-2 block">
+        Qual coluna é a classe-alvo?
+      </label>
+      <select id="mm-select-coluna-alvo" class="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"></select>
+      <p id="mm-coluna-alvo-detalhe" class="text-[11px] text-on-surface-variant mt-1.5"></p>
+
+      <div id="mm-secao-classes" class="mt-3 hidden">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">
+            Quais classes usar no resultado?
+          </p>
+          <label class="flex items-center gap-1.5 text-[11px] font-semibold text-primary cursor-pointer">
+            <input type="checkbox" id="mm-selecionar-todas" class="w-3.5 h-3.5 accent-primary" checked>
+            Selecionar todas
+          </label>
+        </div>
+        <div id="mm-lista-classes" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+        <p id="mm-classes-aviso" class="text-[11px] mt-1.5"></p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap justify-end gap-3">
+      <button id="mm-btn-nova-base" type="button" class="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">
+        Enviar Nova Base
+      </button>
+      <button id="mm-btn-fundir" type="button" class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary-container text-on-primary-container hover:opacity-90 transition-opacity">
+        Realizar Fusão
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading" class="fixed inset-0 bg-white/80 backdrop-blur-sm flex-col items-center justify-center z-[60]" style="display:none">
+  <div class="w-14 h-14 border-4 border-primary-fixed border-t-primary rounded-full animate-spin mb-6"></div>
+  <p class="text-on-surface font-semibold text-lg">Analisando dataset...</p>
+  <p class="text-on-surface-variant text-sm mt-2">Pré-processamento → Extração → AutoML → Laudo IA</p>
+  <p class="text-on-surface-variant/70 text-xs mt-4">Pode levar de 2 a 10 minutos dependendo do tamanho do dataset.</p>
+</div>
+
+<!-- Footer -->
+<footer class="w-full mt-auto flex flex-col md:flex-row justify-between items-center px-8 bg-surface-container-low border-t border-outline-variant py-8">
+  <div class="flex flex-col items-center md:items-start mb-4 md:mb-0">
+    <span class="text-xs font-semibold text-on-surface-variant">🧬 BioStatusIA</span>
+    <span class="text-xs text-on-surface-variant">Projeto de mestrado — IA na Saúde · Fortaleza/CE</span>
+  </div>
+  <div class="flex gap-6 text-xs">
+    <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Termos de Uso</a>
+    <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Privacidade</a>
+    <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Contato</a>
+  </div>
+</footer>
+
+<script>
+  // ── Utilitários de UI ──────────────────────────────────────────────────
+  function mostrarNome(input) {
+    const el = document.getElementById('nome-arquivo');
+    if (input.files && input.files[0]) {
+      el.textContent = input.files[0].name;
+      el.classList.remove('hidden');
+      validarArquivoLocal(input.files[0]);
+    }
+  }
+  function mostrarLoading() {
+    document.getElementById('loading').style.display = 'flex';
+  }
+  function esconderLoading() {
+    document.getElementById('loading').style.display = 'none';
+  }
+
+  // ── Modal de validação ───────────────────────────────────────────────
+  const modal = document.getElementById('modal-validacao');
+  function abrirModal({ titulo, mensagem, valorInformado, exemplo, onCorrigir }) {
+    document.getElementById('modal-titulo').textContent = titulo || 'Campo inválido';
+    document.getElementById('modal-mensagem').textContent = mensagem || '';
+
+    const boxValor = document.getElementById('modal-valor-informado-box');
+    if (valorInformado) {
+      document.getElementById('modal-valor-informado').textContent = valorInformado;
+      boxValor.classList.remove('hidden');
+    } else {
+      boxValor.classList.add('hidden');
+    }
+
+    const boxExemplo = document.getElementById('modal-exemplo-box');
+    if (exemplo) {
+      document.getElementById('modal-exemplo').textContent = exemplo;
+      boxExemplo.classList.remove('hidden');
+    } else {
+      boxExemplo.classList.add('hidden');
+    }
+
+    const btnCorrigir = document.getElementById('modal-btn-corrigir');
+    if (onCorrigir) {
+      btnCorrigir.classList.remove('hidden');
+      btnCorrigir.onclick = () => { onCorrigir(); fecharModal(); };
+    } else {
+      btnCorrigir.classList.add('hidden');
+      btnCorrigir.onclick = null;
+    }
+
+    modal.style.display = 'flex';
+  }
+  function fecharModal() { modal.style.display = 'none'; }
+  document.getElementById('modal-btn-fechar').addEventListener('click', fecharModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
+
+  // ── Validação do link/ID do Kaggle (espelha biostatusia/validacao.py) ──
+  const EXEMPLO_KAGGLE = 'paultimothymooney/chest-xray-pneumonia';
+
+  function analisarKaggleId(valorBruto) {
+    const valor = (valorBruto || '').trim();
+    if (!valor) return { ok: true, valor: '' };
+
+    if (/kaggle\.com/i.test(valor)) {
+      let m = valor.match(/kaggle\.com\/datasets\/([\w.-]+)\/([\w.-]+)/i);
+      if (m) return { ok: true, valor: `${m[1]}/${m[2]}`, corrigido: true, original: valor };
+
+      if (/kaggle\.com\/code\//i.test(valor)) {
+        return {
+          ok: false,
+          mensagem: 'Esse é o link de um notebook/código do Kaggle, não de um dataset. Abra o notebook, veja a aba "Input" (dados usados), clique no dataset e copie o ID de lá.',
+        };
+      }
+      if (/kaggle\.com\/competitions\//i.test(valor)) {
+        return {
+          ok: false,
+          mensagem: 'Esse é o link de uma competição do Kaggle. Datasets de competição exigem aceitar as regras no site e não são suportados diretamente por aqui.',
+        };
+      }
+      return { ok: false, mensagem: 'Não conseguimos identificar um dataset válido nesse link do Kaggle.' };
+    }
+
+    if (/^[\w.-]+\/[\w.-]+$/.test(valor)) return { ok: true, valor };
+
+    return {
+      ok: false,
+      mensagem: 'Formato não reconhecido. O ID do dataset deve ter exatamente uma barra, no formato "dono/nome-do-dataset" (sem "https://", sem "kaggle.com").',
+    };
+  }
+
+  const kaggleInput = document.getElementById('kaggle_id');
+  const kaggleHint = document.getElementById('kaggle-hint');
+  kaggleInput.addEventListener('blur', () => {
+    const valor = kaggleInput.value.trim();
+    if (!valor) { kaggleHint.classList.add('hidden'); return; }
+    const r = analisarKaggleId(valor);
+    if (r.ok && r.corrigido) {
+      kaggleInput.value = r.valor;
+      kaggleHint.textContent = `✓ Corrigimos automaticamente para: ${r.valor}`;
+      kaggleHint.className = 'text-[11px] mt-1 text-secondary font-medium';
+      kaggleHint.classList.remove('hidden');
+    } else if (!r.ok) {
+      kaggleHint.textContent = `⚠ ${r.mensagem}`;
+      kaggleHint.className = 'text-[11px] mt-1 text-error font-medium';
+      kaggleHint.classList.remove('hidden');
+    } else {
+      kaggleHint.classList.add('hidden');
+    }
+  });
+
+  // ── Validação de arquivo local (extensão + tamanho) ────────────────────
+  const EXTENSOES_ACEITAS = ['.zip', '.tar.gz', '.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff',
+    '.csv', '.txt', '.tsv', '.xlsx', '.edf', '.bdf', '.dat', '.hea', '.mat', '.cnt', '.eeg', '.rec', '.c3d',
+    '.set', '.xml', '.dcm', '.nii', '.gz', '.mha'];
+  const MAX_UPLOAD_BYTES = 4096 * 1024 * 1024; // 4 GB — mesmo limite do servidor
+
+  function validarArquivoLocal(file) {
+    const nome = file.name.toLowerCase();
+    const ok = EXTENSOES_ACEITAS.some(ext => nome.endsWith(ext));
+    if (!ok) {
+      abrirModal({
+        titulo: 'Tipo de arquivo não suportado',
+        mensagem: `A extensão desse arquivo não é reconhecida pelo sistema.`,
+        valorInformado: file.name,
+        exemplo: 'Use .zip, .csv/.txt/.tsv (tabular), .png/.jpg/.tif (imagem), .edf/.mat/.hea (sinal), .dcm (DICOM) ou .nii/.mha (volume 3D).',
+      });
+      document.getElementById('arquivo').value = '';
+      document.getElementById('nome-arquivo').classList.add('hidden');
+      return false;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      const tamanhoGb = (file.size / (1024 ** 3)).toFixed(1);
+      abrirModal({
+        titulo: 'Arquivo muito grande',
+        mensagem: `Esse arquivo tem ${tamanhoGb} GB, acima do limite de 4 GB para upload direto.`,
+        exemplo: 'Para datasets grandes, use o campo "Caminho local da pasta" apontando para onde o arquivo já está no servidor.',
+      });
+      document.getElementById('arquivo').value = '';
+      document.getElementById('nome-arquivo').classList.add('hidden');
+      return false;
+    }
+    return true;
+  }
+
+  // ── Drag & drop ─────────────────────────────────────────────────────────
+  const dropZone = document.getElementById('drop-zone');
+  ['dragenter','dragover','dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false));
+  ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.add('drop-zone-active'), false));
+  ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.remove('drop-zone-active'), false));
+  dropZone.addEventListener('drop', e => {
+    const input = document.getElementById('arquivo');
+    input.files = e.dataTransfer.files;
+    mostrarNome(input);
+  }, false);
+
+  // ── Modal de confirmação multimodal / escolha de coluna-alvo ────────────
+  const modalMM = document.getElementById('modal-multimodal');
+  const ROTULOS_FAMILIA_ICONE = {
+    imagem: '🩻', tabular: '📋', sinal_temporal: '💓', dicom: '🖼️', volume_3d: '🧊',
+  };
+  const ROTULOS_NOME = {
+    imagem: 'imagem', tabular: 'tabular', sinal_temporal: 'sinal', dicom: 'DICOM', volume_3d: 'volume 3D',
+  };
+
+  function abrirModalMultimodal(payload, formDataOriginal) {
+    const temModalidades = Array.isArray(payload.modalidades) && payload.modalidades.length > 0;
+    const temColunas = Array.isArray(payload.colunas_candidatas) && payload.colunas_candidatas.length > 0;
+
+    // Título/subtítulo dinâmicos conforme o que está sendo pedido
+    const titulo = document.getElementById('mm-titulo-modal');
+    const subtitulo = document.getElementById('mm-subtitulo-modal');
+    if (temModalidades && temColunas) {
+      titulo.textContent = 'Base multimodal detectada';
+      subtitulo.textContent = 'Encontramos mais de um tipo de dado, e mais de uma coluna que pode ser a classe-alvo. Confira antes de continuar:';
+    } else if (temModalidades) {
+      titulo.textContent = 'Base multimodal detectada';
+      subtitulo.textContent = 'Encontramos mais de um tipo de dado nessa base. Confira antes de continuar:';
+    } else if (temColunas) {
+      titulo.textContent = 'Qual é a classe-alvo desta análise?';
+      subtitulo.textContent = 'Encontramos mais de uma coluna que pode ser o rótulo a prever. Escolha qual delas usar — vale tanto para o AutoML quanto para os classificadores tradicionais.';
+    }
+
+    // ── Seção: tipos de dado encontrados (só se for multimodal) ──────────
+    document.getElementById('mm-secao-modalidades').style.display = temModalidades ? 'block' : 'none';
+    if (temModalidades) {
+      const lista = document.getElementById('mm-lista-modalidades');
+      lista.innerHTML = payload.modalidades.map(m => {
+        const icone = ROTULOS_FAMILIA_ICONE[m.familia] || '📁';
+        const detalhe = m.n_linhas ? `${m.n_arquivos} arquivo(s), ${m.n_linhas} linha(s)` : `${m.n_arquivos} arquivo(s)`;
+        return `<div class="flex items-center gap-3 bg-surface-container rounded-lg px-3 py-2">
+          <span class="text-xl">${icone}</span>
+          <div class="flex-grow">
+            <p class="text-sm font-semibold text-on-surface">${m.rotulo}</p>
+            <p class="text-[11px] text-on-surface-variant">${detalhe}</p>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Seção: status de alinhamento (só se for multimodal) ──────────────
+    const box = document.getElementById('mm-alinhamento-box');
+    const alTitulo = document.getElementById('mm-alinhamento-titulo');
+    const alTexto = document.getElementById('mm-alinhamento-texto');
+    const alinhamento = payload.alinhamento;
+    const btnFundir = document.getElementById('mm-btn-fundir');
+    box.style.display = temModalidades ? 'block' : 'none';
+
+    let textoBotaoFusao = 'Confirmar e Analisar';
+    if (temModalidades) {
+      if (alinhamento && alinhamento.alinhado) {
+        const nomesAlinhados = (alinhamento.modalidades || []).map(n => ROTULOS_NOME[n] || n).join(' + ');
+        const colunaTxt = alinhamento.coluna_id_tabular ? ` (coluna "${alinhamento.coluna_id_tabular}")` : '';
+        box.className = 'mb-5 rounded-xl p-4 border bg-secondary-container/30 border-secondary-container';
+        alTitulo.className = 'text-sm font-bold mb-1 text-on-secondary-container';
+        alTitulo.textContent = '✓ Mesmos pacientes identificados';
+        alTexto.className = 'text-sm text-on-secondary-container';
+        alTexto.textContent = `${alinhamento.n_pareados} amostra(s) casadas entre ${nomesAlinhados}${colunaTxt}. A fusão pode ser calculada normalmente.`;
+        if (alinhamento.modalidades_excluidas && alinhamento.modalidades_excluidas.length) {
+          const excluidasTxt = alinhamento.modalidades_excluidas.map(n => ROTULOS_NOME[n] || n).join(', ');
+          alTexto.textContent += ` (${excluidasTxt} ficou de fora por falta de identificador comum.)`;
+        }
+        textoBotaoFusao = 'Realizar Fusão';
+      } else if (alinhamento) {
+        box.className = 'mb-5 rounded-xl p-4 border bg-error-container/30 border-error-container';
+        alTitulo.className = 'text-sm font-bold mb-1 text-on-error-container';
+        alTitulo.textContent = '⚠ Não foi possível confirmar que são os mesmos pacientes';
+        alTexto.className = 'text-sm text-on-error-container';
+        alTexto.textContent = alinhamento.motivo || 'Sem um identificador em comum, não dá para garantir que os dados são das mesmas pessoas.';
+        textoBotaoFusao = 'Continuar mesmo assim';
+      } else {
+        box.className = 'mb-5 rounded-xl p-4 border bg-surface-container border-outline-variant';
+        alTitulo.className = 'text-sm font-bold mb-1 text-on-surface';
+        alTitulo.textContent = 'Não foi possível verificar o alinhamento';
+        alTexto.className = 'text-sm text-on-surface-variant';
+        alTexto.textContent = 'Não conseguimos checar automaticamente se os dados são dos mesmos pacientes. Você pode tentar mesmo assim.';
+        textoBotaoFusao = 'Continuar mesmo assim';
+      }
+    }
+    btnFundir.textContent = textoBotaoFusao;
+
+    // ── Seção: escolha da coluna-alvo (+ escolha de classes, se > 2) ───────
+    const secaoColuna = document.getElementById('mm-secao-coluna-alvo');
+    const selectColuna = document.getElementById('mm-select-coluna-alvo');
+    const detalheColuna = document.getElementById('mm-coluna-alvo-detalhe');
+    const secaoClasses = document.getElementById('mm-secao-classes');
+    const listaClasses = document.getElementById('mm-lista-classes');
+    const classesAviso = document.getElementById('mm-classes-aviso');
+    const selecionarTodas = document.getElementById('mm-selecionar-todas');
+    secaoColuna.style.display = temColunas ? 'block' : 'none';
+
+    function classesMarcadas() {
+      return Array.from(listaClasses.querySelectorAll('input[type=checkbox]:checked')).map(el => el.value);
+    }
+
+    function sincronizarSelecionarTodas() {
+      const total = listaClasses.querySelectorAll('input[type=checkbox]').length;
+      const marcadas = classesMarcadas().length;
+      selecionarTodas.checked = total > 0 && marcadas === total;
+      selecionarTodas.indeterminate = marcadas > 0 && marcadas < total;
+    }
+
+    function atualizarEstadoBotao() {
+      const escolhida = temColunas ? payload.colunas_candidatas.find(c => c.nome === selectColuna.value) : null;
+      if (escolhida && escolhida.n_classes > 2) {
+        const n = classesMarcadas().length;
+        btnFundir.disabled = n < 2;
+        if (n < 2) {
+          classesAviso.textContent = `Selecione pelo menos 2 classes (${n} selecionada${n === 1 ? '' : 's'} até agora).`;
+          classesAviso.className = 'text-[11px] mt-1.5 text-amber-700 font-medium';
+        } else if (n === 2) {
+          classesAviso.textContent = '✓ 2 classes selecionadas — classificação binária.';
+          classesAviso.className = 'text-[11px] mt-1.5 text-secondary font-medium';
+        } else {
+          classesAviso.textContent = `✓ ${n} classes selecionadas — classificação multi-classe.`;
+          classesAviso.className = 'text-[11px] mt-1.5 text-secondary font-medium';
+        }
+      } else {
+        btnFundir.disabled = false;
+      }
+    }
+
+    if (temColunas) {
+      selectColuna.innerHTML = payload.colunas_candidatas.map(c => {
+        const selecionado = c.nome === payload.coluna_sugerida ? 'selected' : '';
+        return `<option value="${c.nome}" ${selecionado}>${c.nome} (${c.n_classes} classes)</option>`;
+      }).join('');
+
+      const atualizarDetalheEClasses = () => {
+        const escolhida = payload.colunas_candidatas.find(c => c.nome === selectColuna.value);
+        if (!escolhida) return;
+        const sugeridaTxt = escolhida.nome === payload.coluna_sugerida ? ' — sugestão automática' : '';
+        detalheColuna.textContent = `${escolhida.n_classes} classe(s) encontrada(s)${sugeridaTxt}`;
+
+        if (escolhida.n_classes > 2) {
+          secaoClasses.classList.remove('hidden');
+          // Todas as classes vêm marcadas por padrão — fazem parte do resultado final.
+          listaClasses.innerHTML = escolhida.classes.map(cl => `
+            <label class="flex items-center gap-2.5 bg-surface-container rounded-lg px-3 py-2 cursor-pointer hover:bg-surface-container-high transition-colors">
+              <input type="checkbox" value="${cl.valor}" class="mm-classe-checkbox w-4 h-4 accent-primary" checked>
+              <span class="text-sm text-on-surface flex-grow">${cl.valor}</span>
+              <span class="text-[11px] text-on-surface-variant font-mono">${cl.n} amostra(s)</span>
+            </label>
+          `).join('');
+          listaClasses.querySelectorAll('.mm-classe-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => {
+              sincronizarSelecionarTodas();
+              atualizarEstadoBotao();
+            });
+          });
+          sincronizarSelecionarTodas();
+        } else {
+          secaoClasses.classList.add('hidden');
+          listaClasses.innerHTML = '';
+        }
+        atualizarEstadoBotao();
+      };
+      selectColuna.onchange = atualizarDetalheEClasses;
+      atualizarDetalheEClasses();
+
+      selecionarTodas.onchange = () => {
+        listaClasses.querySelectorAll('.mm-classe-checkbox').forEach(cb => {
+          cb.checked = selecionarTodas.checked;
+        });
+        selecionarTodas.indeterminate = false;
+        atualizarEstadoBotao();
+      };
+    }
+
+    document.getElementById('mm-btn-fundir').onclick = async () => {
+      modalMM.style.display = 'none';
+      mostrarLoading();
+      try {
+        const fd = new FormData();
+        fd.append('caminho_manual', payload.dataset_path);
+        fd.append('confirmado', '1');
+        fd.append('tipo_sinal', formDataOriginal.get('tipo_sinal') || 'auto');
+        if (temColunas) {
+          fd.append('coluna_alvo', selectColuna.value);
+          classesMarcadas().forEach(v => fd.append('classes_selecionadas', v));
+        }
+        const resp2 = await fetch(form.action, { method: 'POST', body: fd });
+        if (resp2.ok) { window.location.href = resp2.url; return; }
+        esconderLoading();
+        let dados2;
+        try { dados2 = await resp2.json(); } catch { dados2 = { mensagem: `Erro inesperado (HTTP ${resp2.status}).` }; }
+        abrirModal({ titulo: 'Não foi possível iniciar a análise', mensagem: dados2.mensagem, exemplo: dados2.exemplo_correto || null });
+      } catch (err) {
+        esconderLoading();
+        abrirModal({ titulo: 'Erro de conexão', mensagem: 'Não foi possível se comunicar com o servidor. Tente novamente.' });
+      }
+    };
+
+    document.getElementById('mm-btn-nova-base').onclick = () => {
+      window.location.href = '/';
+    };
+
+    modalMM.style.display = 'flex';
+  }
+  modalMM.addEventListener('click', (e) => { if (e.target === modalMM) modalMM.style.display = 'none'; });
+
+  // ── Envio do formulário (validação client-side + fetch com tratamento de erro) ──
+  const form = document.getElementById('form-analise');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const arquivoInput = document.getElementById('arquivo');
+    const caminho = document.getElementById('caminho_manual').value.trim();
+    const kaggleValor = kaggleInput.value.trim();
+    const temArquivo = arquivoInput.files && arquivoInput.files.length > 0;
+
+    // Checagem client-side do Kaggle antes de gastar uma requisição
+    const rKaggle = analisarKaggleId(kaggleValor);
+    if (!rKaggle.ok) {
+      abrirModal({
+        titulo: 'Link do Kaggle não reconhecido',
+        mensagem: rKaggle.mensagem,
+        valorInformado: kaggleValor,
+        exemplo: EXEMPLO_KAGGLE,
+      });
+      return;
+    }
+    if (rKaggle.corrigido) kaggleInput.value = rKaggle.valor;
+
+    // Nenhuma fonte informada — avisa que vai cair no dataset de exemplo padrão
+    if (!temArquivo && !caminho && !rKaggle.valor) {
+      abrirModal({
+        titulo: 'Nenhuma fonte de dados informada',
+        mensagem: 'Você não selecionou um arquivo, nem um caminho local, nem um dataset do Kaggle. Se continuar assim, o sistema vai usar um dataset de exemplo padrão (câncer de mama). Prefere voltar e escolher uma fonte?',
+        exemplo: 'Escolha um arquivo, cole um caminho local, ou informe um ID do Kaggle (ex: "paultimothymooney/chest-xray-pneumonia").',
+      });
+      return;
+    }
+
+    const dadosFormulario = new FormData(form);
+    mostrarLoading();
+    try {
+      const resp = await fetch(form.action, { method: 'POST', body: dadosFormulario });
+
+      if (resp.redirected) {
+        // Análise concluída de verdade (modo não-multimodal, ou já confirmado).
+        window.location.href = resp.url;
+        return;
+      }
+      if (resp.ok) {
+        // Status 200 sem redirect -> pode ser o pedido de confirmação multimodal.
+        const dados = await resp.json();
+        esconderLoading();
+        if (dados.precisa_confirmacao) {
+          abrirModalMultimodal(dados, dadosFormulario);
+          return;
+        }
+        // Resposta 200 inesperada sem redirect nem pedido de confirmação.
+        window.location.href = resp.url;
+        return;
+      }
+
+      esconderLoading();
+      let dados;
+      try { dados = await resp.json(); }
+      catch { dados = { mensagem: `Erro inesperado (HTTP ${resp.status}).` }; }
+      abrirModal({
+        titulo: 'Não foi possível iniciar a análise',
+        mensagem: dados.mensagem || 'Ocorreu um erro ao validar os dados enviados.',
+        valorInformado: dados.campo === 'kaggle_id' ? kaggleValor : (dados.campo === 'caminho_manual' ? caminho : null),
+        exemplo: dados.exemplo_correto || null,
+      });
+    } catch (err) {
+      esconderLoading();
+      abrirModal({
+        titulo: 'Erro de conexão',
+        mensagem: 'Não foi possível se comunicar com o servidor. Verifique sua conexão e tente novamente.',
+      });
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<svg viewBox="0 0 1500 1470" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+
+<defs>
+  <marker id="seta" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+  </marker>
+  <marker id="seta-teal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L0,6 L9,3 z" fill="#0d9488"/>
+  </marker>
+  <linearGradient id="grad-header" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#0d9488"/>
+    <stop offset="100%" stop-color="#0f766e"/>
+  </linearGradient>
+</defs>
+
+<rect x="0" y="0" width="1500" height="1470" fill="#f8fafc"/>
+<rect x="0" y="0" width="1500" height="64" rx="0" fill="url(#grad-header)" stroke="none" stroke-width="2"/>
+<text x="750.0" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="white" text-anchor="middle">BioStatusIA — Arquitetura e Fluxo do Sistema</text>
+<text x="750.0" y="52" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#ccfbf1" text-anchor="middle">Da entrada de dados ao laudo clínico: detecção → confirmação → extração → AutoML → fusão → resultado</text>
+<text x="60" y="118" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="white" text-anchor="middle">1</text>
+<circle cx="52" cy="112" r="16" fill="#0d9488"/>
+<text x="52" y="118" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">1</text>
+<text x="90" y="118" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#0f172a" text-anchor="start">ENTRADA DE DADOS</text>
+<rect x="60" y="135" width="300" height="55" rx="10" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
+<text x="210" y="168" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#0f766e" text-anchor="middle">Upload de arquivo</text>
+<rect x="400" y="135" width="300" height="55" rx="10" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
+<text x="550" y="168" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#0f766e" text-anchor="middle">Caminho local</text>
+<rect x="740" y="135" width="300" height="55" rx="10" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
+<text x="890" y="168" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#0f766e" text-anchor="middle">Dataset do Kaggle</text>
+<line x1="210" y1="190" x2="750.0" y2="240" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="550" y1="190" x2="750.0" y2="240" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="890" y1="190" x2="750.0" y2="240" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<circle cx="52" cy="272" r="16" fill="#0d9488"/>
+<text x="52" y="278" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">2</text>
+<rect x="300" y="245" width="900" height="70" rx="12" fill="#0f766e" stroke="none" stroke-width="2"/>
+<text x="750.0" y="275" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="white" text-anchor="middle">DETECÇÃO AUTOMÁTICA DE MODO</text>
+<text x="750.0" y="297" font-family="Arial, sans-serif" font-size="12.5" font-weight="400" fill="#ccfbf1" text-anchor="middle">imagem · tabular (.csv/.xlsx) · sinal · DICOM · volume 3D — isolados ou combinados (multimodal)</text>
+<line x1="750.0" y1="315" x2="750.0" y2="320" stroke="#0d9488" stroke-width="3" marker-end="url(#seta)" />
+<circle cx="52" cy="368" r="16" fill="#0d9488"/>
+<text x="52" y="374" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">3</text>
+<text x="90" y="374" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#0f172a" text-anchor="start">CONFIRMAÇÃO ANTES DE RODAR (quando há ambiguidade)</text>
+<rect x="300.0" y="390" width="430" height="100" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="2"/>
+<text x="515.0" y="418" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#92400e" text-anchor="middle">Modal: base multimodal?</text>
+<text x="515.0" y="440" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#78350f" text-anchor="middle">Mostra modalidades encontradas +</text>
+<text x="515.0" y="457" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#78350f" text-anchor="middle">se dá pra alinhar por paciente.</text>
+<rect x="770.0" y="390" width="430" height="100" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="2"/>
+<text x="985.0" y="418" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#92400e" text-anchor="middle">Modal: qual coluna/classes?</text>
+<text x="985.0" y="440" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#78350f" text-anchor="middle">Sugere automático, mas deixa</text>
+<text x="985.0" y="457" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#78350f" text-anchor="middle">escolher coluna-alvo e classes.</text>
+<rect x="270.0" y="510" width="960" height="40" rx="10" fill="#fef3c7" stroke="#fcd34d" stroke-width="2"/>
+<text x="750.0" y="535" font-family="Arial, sans-serif" font-size="12.5" font-weight="600" fill="#78350f" text-anchor="middle">Usuário confirma ("Realizar Fusão" / "Confirmar e Analisar") ou cancela ("Enviar Nova Base")</text>
+<line x1="750.0" y1="550" x2="750.0" y2="555" stroke="#0d9488" stroke-width="3" marker-end="url(#seta)" />
+<circle cx="52" cy="603" r="16" fill="#0d9488"/>
+<text x="52" y="609" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">4</text>
+<text x="90" y="609" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#0f172a" text-anchor="start">EXTRAÇÃO POR MODALIDADE — agentes CrewAI + Ollama (LLM local)</text>
+<rect x="60.0" y="630" width="260" height="150" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<rect x="60.0" y="630" width="260" height="34" rx="12" fill="#0d9488" stroke="none" stroke-width="2"/>
+<rect x="60.0" y="647" width="260" height="17" fill="#0d9488"/>
+<text x="190.0" y="653" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">IMAGEM</text>
+<text x="190.0" y="682" font-family="Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f766e" text-anchor="middle">BioStatusIACrew</text>
+<text x="190.0" y="702" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">engenheiro_pdi</text>
+<text x="190.0" y="717" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">analista_tecnico</text>
+<text x="190.0" y="732" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">cientista_dados</text>
+<text x="190.0" y="764" font-family="Arial, sans-serif" font-size="10.5" font-weight="600" fill="#64748b" text-anchor="middle" font-style="italic">→ biomarcadores.json</text>
+<rect x="340.0" y="630" width="260" height="150" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<rect x="340.0" y="630" width="260" height="34" rx="12" fill="#0d9488" stroke="none" stroke-width="2"/>
+<rect x="340.0" y="647" width="260" height="17" fill="#0d9488"/>
+<text x="470.0" y="653" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">TABULAR</text>
+<text x="470.0" y="682" font-family="Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f766e" text-anchor="middle">BioStatusIACrewTabular</text>
+<text x="470.0" y="702" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">bioestatistico</text>
+<text x="470.0" y="764" font-family="Arial, sans-serif" font-size="10.5" font-weight="600" fill="#64748b" text-anchor="middle" font-style="italic">→ biomarcadores.json</text>
+<rect x="620.0" y="630" width="260" height="150" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<rect x="620.0" y="630" width="260" height="34" rx="12" fill="#0d9488" stroke="none" stroke-width="2"/>
+<rect x="620.0" y="647" width="260" height="17" fill="#0d9488"/>
+<text x="750.0" y="653" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">SINAL</text>
+<text x="750.0" y="682" font-family="Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f766e" text-anchor="middle">BioStatusIACrewSinal</text>
+<text x="750.0" y="702" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">analista_sinais_fisiologicos</text>
+<text x="750.0" y="764" font-family="Arial, sans-serif" font-size="10.5" font-weight="600" fill="#64748b" text-anchor="middle" font-style="italic">→ biomarcadores.json</text>
+<rect x="900.0" y="630" width="260" height="150" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<rect x="900.0" y="630" width="260" height="34" rx="12" fill="#0d9488" stroke="none" stroke-width="2"/>
+<rect x="900.0" y="647" width="260" height="17" fill="#0d9488"/>
+<text x="1030.0" y="653" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">DICOM</text>
+<text x="1030.0" y="682" font-family="Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f766e" text-anchor="middle">BioStatusIACrewImagem3D</text>
+<text x="1030.0" y="702" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">especialista_imagem_médica</text>
+<text x="1030.0" y="764" font-family="Arial, sans-serif" font-size="10.5" font-weight="600" fill="#64748b" text-anchor="middle" font-style="italic">→ biomarcadores.json</text>
+<rect x="1180.0" y="630" width="260" height="150" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<rect x="1180.0" y="630" width="260" height="34" rx="12" fill="#0d9488" stroke="none" stroke-width="2"/>
+<rect x="1180.0" y="647" width="260" height="17" fill="#0d9488"/>
+<text x="1310.0" y="653" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="white" text-anchor="middle">VOLUME 3D</text>
+<text x="1310.0" y="682" font-family="Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f766e" text-anchor="middle">BioStatusIACrewImagem3D</text>
+<text x="1310.0" y="702" font-family="Arial, sans-serif" font-size="10.5" font-weight="400" fill="#334155" text-anchor="middle">especialista_imagem_médica</text>
+<text x="1310.0" y="764" font-family="Arial, sans-serif" font-size="10.5" font-weight="600" fill="#64748b" text-anchor="middle" font-style="italic">→ biomarcadores.json</text>
+<line x1="190.0" y1="780" x2="750.0" y2="787" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="470.0" y1="780" x2="750.0" y2="787" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="750.0" y1="780" x2="750.0" y2="787" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="1030.0" y1="780" x2="750.0" y2="787" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="1310.0" y1="780" x2="750.0" y2="787" stroke="#5eead4" stroke-width="2.5" marker-end="url(#seta)" />
+<circle cx="52" cy="833" r="16" fill="#0d9488"/>
+<text x="52" y="839" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">5</text>
+<text x="90" y="839" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#0f172a" text-anchor="start">AUTOML — por modalidade (binário ou multi-classe)</text>
+<rect x="150" y="855" width="1200" height="130" rx="14" fill="#0f172a" stroke="none" stroke-width="2"/>
+<text x="750.0" y="883" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">6 classificadores concorrentes</text>
+<text x="750.0" y="905" font-family="Arial, sans-serif" font-size="12.5" font-weight="600" fill="#cbd5e1" text-anchor="middle">Regressão Logística · KNN · SVM · Random Forest · Gradient Boosting · MLP</text>
+<text x="750.0" y="931" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#94a3b8" text-anchor="middle">Split 80/20 → CV interna 5-fold×3 (seleção) → held-out (avaliação final, nunca vaza)</text>
+<text x="750.0" y="953" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#94a3b8" text-anchor="middle">Score clínico (AUC + MCC − ECE) com veto de piso de sensibilidade + SHAP</text>
+<text x="750.0" y="973" font-family="Arial, sans-serif" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">Persistência do vencedor · Interpretabilidade · Teste A/B (McNemar)</text>
+<line x1="750.0" y1="985" x2="750.0" y2="997" stroke="#0d9488" stroke-width="3" marker-end="url(#seta)" />
+<circle cx="52" cy="1043" r="16" fill="#0d9488"/>
+<text x="52" y="1049" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">6</text>
+<text x="90" y="1049" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#0f172a" text-anchor="start">FUSÃO MULTIMODAL — só quando há 2+ modalidades alinhadas</text>
+<rect x="150" y="1065" width="386.6666666666667" height="110" rx="12" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
+<text x="343.33333333333337" y="1093" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#0f766e" text-anchor="middle">Alinhamento N-a-N</text>
+<text x="343.33333333333337" y="1115" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">por nome de arquivo ou</text>
+<text x="343.33333333333337" y="1130" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">coluna de ID (patient_id,</text>
+<text x="343.33333333333337" y="1145" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">echo, filename...)</text>
+<rect x="556.6666666666667" y="1065" width="386.6666666666667" height="110" rx="12" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
+<text x="750.0000000000001" y="1093" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#0f766e" text-anchor="middle">Média ponderada</text>
+<text x="750.0000000000001" y="1115" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">peso ∝ (AUC − ECE)</text>
+<text x="750.0000000000001" y="1130" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">de cada modalidade,</text>
+<text x="750.0000000000001" y="1145" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">via CV interna</text>
+<rect x="963.3333333333335" y="1065" width="386.6666666666667" height="110" rx="12" fill="#f0fdfa" stroke="#5eead4" stroke-width="2"/>
+<text x="1156.6666666666667" y="1093" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#0f766e" text-anchor="middle">Stacking</text>
+<text x="1156.6666666666667" y="1115" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">meta-modelo combina</text>
+<text x="1156.6666666666667" y="1130" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">probabilidades de</text>
+<text x="1156.6666666666667" y="1145" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#334155" text-anchor="middle">todas as modalidades</text>
+<line x1="536.6666666666667" y1="1120" x2="556.6666666666667" y2="1120" stroke="#0d9488" stroke-width="2.5" marker-end="url(#seta)" />
+<line x1="943.3333333333335" y1="1120" x2="963.3333333333335" y2="1120" stroke="#0d9488" stroke-width="2.5" marker-end="url(#seta)" />
+<rect x="150" y="1195" width="1200" height="36" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
+<text x="750.0" y="1218" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#065f46" text-anchor="middle">As duas formas de fusão competem contra cada modalidade isolada — só "vencem" se realmente forem melhores</text>
+<line x1="750.0" y1="1231" x2="750.0" y2="1238" stroke="#0d9488" stroke-width="3" marker-end="url(#seta)" />
+<circle cx="52" cy="1284" r="16" fill="#0d9488"/>
+<text x="52" y="1290" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle">7</text>
+<text x="90" y="1290" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#0f172a" text-anchor="start">RESULTADO</text>
+<rect x="150" y="1306" width="585.0" height="90" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<text x="442.5" y="1336" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#0f766e" text-anchor="middle">TELA DE RESULTADOS</text>
+<text x="442.5" y="1358" font-family="Arial, sans-serif" font-size="11.5" font-weight="400" fill="#334155" text-anchor="middle">Ranking, matriz de confusão,</text>
+<text x="442.5" y="1374" font-family="Arial, sans-serif" font-size="11.5" font-weight="400" fill="#334155" text-anchor="middle">curva ROC, SHAP, comparação de fusão</text>
+<rect x="765.0" y="1306" width="585.0" height="90" rx="12" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+<text x="1057.5" y="1336" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#0f766e" text-anchor="middle">LAUDO CLÍNICO (IA)</text>
+<text x="1057.5" y="1358" font-family="Arial, sans-serif" font-size="11.5" font-weight="400" fill="#334155" text-anchor="middle">Gerado por Ollama (LLM local)</text>
+<text x="1057.5" y="1374" font-family="Arial, sans-serif" font-size="11.5" font-weight="400" fill="#334155" text-anchor="middle">— achado, severidade, aviso ético</text>
+</svg>

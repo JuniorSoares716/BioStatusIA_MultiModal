@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# UV
+.uv/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Banco de dados local
+biostatusia.db
+*.sqlite
+*.sqlite3
+
+# Modelos ML treinados (regerados em runtime)
+models/
+*.pkl
+*.joblib
+
+# Uploads e workspaces dos kickoffs
+src/biostatusia/static/uploads/
+src/biostatusia/static/runs/
+
+# Datasets de teste pesados (apenas o CSV pequeno fica versionado)
+dataset_teste/
+dataset_teste.zip
+dataset_teste_busi/
+dataset_benchmark_30/
+dataset_kaggle_reais/
+
+# Render screenshots temporários
+reports/render_*.png
+
+# HTMLs gerados em runtime (legado do main.py CLI)
+dashboard_inteligencia_medica.html
+relatorio_tecnico_biostatsia.html
+
+# Claude Code workspace
+.claude/
+
+# Cache do KaggleHub (geralmente em ~/.cache/, mas por segurança)
+.kagglehub/

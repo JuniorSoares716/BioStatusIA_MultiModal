@@ -1,0 +1,145 @@
+tarefa_analise_base:
+  description: >
+    Analise a base de imagens em {caminho_dataset}. Use a ferramenta
+    ferramenta_analise_base passando:
+      - caminho_dataset: {caminho_dataset}
+      - pasta_run: {pasta_run}
+    A ferramenta vai computar intensidade, outliers (IQR), normalidade (Shapiro-Wilk),
+    ruído (estimate_sigma), contraste e tamanhos. Em seguida vai decidir a estratégia
+    de pré-processamento (denoising, normalização, equalização, redimensionamento) e
+    persistir tudo em analise_base.json. Reporte os achados e a estratégia escolhida.
+  expected_output: >
+    Resumo objetivo (em texto) com: número de imagens, principais estatísticas
+    detectadas, e a estratégia de pré-processamento escolhida com justificativas.
+
+tarefa_extracao:
+  description: >
+    Aplique a estratégia decidida pelo engenheiro de PDI e extraia os 9 biomarcadores
+    (morfologia, textura GLCM, distribuição de intensidade) de TODAS as imagens em
+    {caminho_dataset}. Use a ferramenta ferramenta_extrair_biomarcadores passando:
+      - caminho_dataset: {caminho_dataset}
+      - pasta_run: {pasta_run}
+    A ferramenta lê a estratégia de analise_base.json e persiste o vetor de
+    biomarcadores de cada imagem em biomarcadores.json.
+  expected_output: >
+    Relatório técnico contendo: número de imagens processadas, distribuição por
+    categoria (BENIGNO/MALIGNO/INDEFINIDO) e biomarcadores da primeira imagem como
+    exemplo de saída.
+
+tarefa_treinar_classificador:
+  description: >
+    Treine os classificadores SVM e RandomForest sobre os biomarcadores extraídos.
+    Use a ferramenta ferramenta_treinar_classificador passando:
+      - pasta_run: {pasta_run}
+    A ferramenta lê biomarcadores.json e treina os modelos com split estratificado 80/20.
+    Se houver menos de 10 amostras rotuladas ou apenas 1 classe, a ferramenta reportará
+    e o treino não será executado. Persiste métricas, ROC e confusion matrix em
+    metricas.json.
+  expected_output: >
+    Tabela em Markdown com as métricas (Acurácia, Precisão, Recall, F1, AUC) de cada
+    modelo, identificação do melhor modelo (maior AUC) e comentário sobre o tamanho
+    amostral.
+
+tarefa_laudo:
+  description: >
+    Com base nos relatórios técnicos dos agentes anteriores (análise da base, extração
+    de biomarcadores, treino do classificador), redija o laudo radiológico final.
+    Correlacione os achados — especialmente Solidez (regularidade das margens) e
+    Entropia (heterogeneidade tecidual) — com padrões clínicos. Se a Solidez for baixa,
+    destaque irregularidade das margens. Se a Entropia for alta, destaque heterogeneidade
+    tecidual. Mencione o melhor classificador quando disponível.
+    Tom obrigatório: profissional, ético e cauteloso. Sempre sugira correlação clínica
+    e nunca afirme diagnóstico definitivo.
+    AVISO ÉTICO OBRIGATÓRIO: inclua ao final do laudo a nota de que este relatório é
+    gerado por IA para suporte à decisão clínica e NÃO substitui avaliação médica.
+  expected_output: >
+    Laudo radiológico preliminar completo em Markdown, contendo: resumo dos achados
+    morfológicos e texturais, interpretação clínica preliminar, métricas do
+    classificador (se disponível), e aviso ético de que o laudo não substitui
+    avaliação médica.
+
+tarefa_laudo_tabular:
+  description: >
+    Analise os dados tabulares localizados em {caminho_csv} usando a ferramenta
+    ferramenta_analise_tabular. A ferramenta retornará um resumo com a coluna-rótulo,
+    distribuição de classes e estatísticas (média, mediana, desvio, min, max) das
+    features numéricas. Sua tarefa:
+    1. Identifique as 3-5 features mais discriminativas entre as classes (maior
+       diferença de média relativa ao desvio entre os grupos).
+    2. Comente o equilíbrio do dataset (balanceado ou desbalanceado).
+    3. Sugira correlação clínica preliminar — sem afirmar diagnóstico.
+    4. Mantenha tom profissional, ético e cauteloso.
+    AVISO ÉTICO OBRIGATÓRIO ao final.
+  expected_output: >
+    Laudo preliminar em Markdown contendo: cabeçalho com nome do dataset, N amostras
+    e N features; seção "Features mais discriminativas" (com valores); seção
+    "Interpretação preliminar"; rodapé com aviso ético de que o laudo não substitui
+    avaliação médica.
+
+# ── Novas tasks para sinais biomédicos expandidos ────────────────────────────
+
+tarefa_extracao_temporal:
+  description: >
+    Extraia biomarcadores de sinais temporais fisiológicos em {caminho_dataset}.
+    Use a ferramenta ferramenta_extrair_sinal_temporal passando:
+      - caminho_dataset: {caminho_dataset}
+      - pasta_run: {pasta_run}
+      - tipo_sinal: {tipo_sinal}
+    A ferramenta detectará automaticamente o tipo (ECG/EEG/EMG/etc.), aplicará
+    filtros adequados e extrairá features no domínio do tempo e da frequência.
+    Se houver rótulos e ≥10 amostras, também treinará classificadores.
+  expected_output: >
+    Relatório técnico com: tipo de sinal detectado, número de arquivos processados,
+    features principais extraídas (RMS, frequência dominante, HRV se ECG, bandas EEG
+    se EEG) e métricas do classificador quando disponível.
+
+tarefa_extracao_imagem_medica:
+  description: >
+    Extraia biomarcadores de imagens médicas DICOM/3D em {caminho_dataset}.
+    Use as ferramentas disponíveis (ferramenta_extrair_dicom OU ferramenta_extrair_volume_3d)
+    conforme o tipo de arquivo detectado.
+    Para DICOM 2D: extrair morfologia, GLCM, densidade mamária, gradiente.
+    Para Volumes 3D: extrair estatísticas globais, textura por plano, morfologia 3D.
+  expected_output: >
+    Relatório técnico com: modalidade detectada, número de imagens/volumes processados,
+    biomarcadores principais (solidez, entropia, volume de lesão para 3D) e métricas
+    de classificador quando disponível.
+
+tarefa_laudo_sinal:
+  description: >
+    Com base nos relatórios técnicos dos agentes de extração de sinais, redija o laudo
+    clínico preliminar. Contextualize os achados de acordo com o tipo de sinal:
+    - ECG: interpretar FC, HRV, morfologia de onda
+    - EEG: interpretar bandas de frequência e ratio alfa/beta
+    - DICOM/3D: interpretar morfologia e textura radiômica
+    Tom obrigatório: profissional, ético e cauteloso.
+    AVISO ÉTICO OBRIGATÓRIO: este laudo é de suporte e NÃO substitui avaliação médica.
+  expected_output: >
+    Laudo clínico preliminar em Markdown com: tipo de sinal, principais achados
+    quantitativos, interpretação clínica contextualizada e aviso ético obrigatório.
+
+tarefa_laudo_interativo:
+  description: >
+    O médico selecionou um trecho/região específica do exame para análise focada.
+    Dados da seleção: {dados_selecao}
+    Tipo de sinal/imagem: {tipo_sinal}
+    Biomarcadores do trecho selecionado: {biomarcadores_trecho}
+
+    Se o campo "inferencia_modelo" estiver presente e "disponivel" for verdadeiro,
+    ele contém a classificação do modelo treinado (classe prevista, probabilidade,
+    e as métricas de validação desse modelo) — cite esse resultado explicitamente
+    no "Achado Principal", com a classe prevista e a probabilidade. Se
+    "inferencia_modelo" não existir ou "disponivel" for falso, baseie o laudo
+    apenas na leitura direta dos biomarcadores extraídos.
+
+    Redija um laudo FOCADO EXCLUSIVAMENTE neste trecho/região.
+    NÃO comente o exame completo — apenas o recorte fornecido.
+    Estrutura obrigatória:
+    1. **Achado Principal**: o que chama atenção neste trecho
+    2. **Severidade Estimada**: escala 1 (normal) a 5 (crítico) com justificativa
+    3. **Comparação com Referência**: valores normais esperados vs. achado
+    4. **Recomendação Imediata**: próximo passo clínico sugerido
+    5. **Aviso Ético**: este laudo é de suporte e NÃO substitui avaliação médica.
+  expected_output: >
+    Laudo interativo em Markdown com as 5 seções obrigatórias, focado no trecho
+    selecionado, em linguagem médica clara e com aviso ético ao final.

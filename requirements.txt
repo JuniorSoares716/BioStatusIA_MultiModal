@@ -1,0 +1,15 @@
+# Framework Multi-Agente
+crewai
+
+# Visão Computacional e Matemática
+opencv-python
+scikit-image
+numpy
+
+# Validação de Dados e Integração
+pydantic
+
+# Utilitários do Projeto
+kagglehub
+markdown
+datetime

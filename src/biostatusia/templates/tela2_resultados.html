@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioStatusIA — Resultados Avançados</title>
+  <!-- Fontes Premium -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = { theme: { extend: { colors: {
+      "primary": "#005c55", "primary-container": "#0f766e", "on-primary": "#ffffff",
+      "on-primary-container": "#a3faef", "secondary": "#216963", "secondary-container": "#a8ece5",
+      "on-secondary-container": "#266d68", "tertiary-fixed": "#ffdcc3", "tertiary-container": "#a15600",
+      "on-tertiary-fixed": "#2f1500", "surface-container-low": "#f0f3ff", "surface-container-high": "#dee8ff",
+      "surface-container-lowest": "#ffffff", "outline-variant": "#bdc9c6", "on-surface-variant": "#3e4947",
+      "error-container": "#ffdad6", "on-error-container": "#93000a"
+    } } } }
+  </script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Estilizações Premium */
+    .premium-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(243, 244, 246, 1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .premium-card:hover {
+      box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.05), 0 8px 10px -6px rgba(13, 148, 136, 0.05);
+      border-color: rgba(13, 148, 136, 0.2);
+    }
+
+    /* Tabs active accent */
+    .tab-active {
+      color: #0f766e;
+      border-bottom: 2px solid #0f766e;
+      font-weight: 700;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* ── Laudo Body ──────────────────────────────────────────────────────────── */
+    .laudo-body h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #0f766e;
+      border-left: 3px solid #14b8a6;
+      padding-left: 0.75rem;
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .laudo-body h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #334155;
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .laudo-body p {
+      color: #475569;
+      font-size: 0.8rem;
+      line-height: 1.75;
+      margin-bottom: 0.5rem;
+    }
+    .laudo-body strong {
+      color: #0f766e;
+      font-weight: 700;
+    }
+    .laudo-body ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 1rem 0;
+    }
+    .laudo-body ul li {
+      padding: 0.25rem 0 0.25rem 1.25rem;
+      position: relative;
+      color: #475569;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    .laudo-body ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: #14b8a6;
+      font-weight: 700;
+    }
+    .laudo-body hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 1.25rem 0;
+    }
+    .laudo-body blockquote {
+      border-left: 3px solid #99f6e4;
+      padding-left: 1rem;
+      color: #64748b;
+      font-size: 0.8rem;
+      font-style: italic;
+      margin: 0.75rem 0;
+    }
+
+    /* ── Aviso ético âmbar ───────────────────────────────────────────────────── */
+    .aviso-etico {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 0.875rem;
+      padding: 0.875rem 1rem;
+      margin-top: 1.5rem;
+    }
+    .aviso-etico-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 0.05rem;
+    }
+    .aviso-etico-texto {
+      font-size: 0.72rem;
+      color: #92400e;
+      line-height: 1.55;
+    }
+    .aviso-etico-titulo {
+      font-weight: 800;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #b45309;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    /* ── Impressão: só o card do laudo ──────────────────────────────────────── */
+    @media print {
+      .no-print { display: none !important; }
+      .laudo-card { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+      body { background: white !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen text-slate-800 antialiased">
+
+  <!-- Top Navigation Bar (Stitch) -->
+  <nav class="sticky top-0 z-50 flex items-center justify-between px-6 bg-primary-container shadow-sm h-16">
+    <div class="flex items-center gap-8">
+      <span class="text-xl font-bold text-on-primary-container">🧬 BioStatusIA</span>
+      <div class="hidden md:flex items-center gap-6 text-sm">
+        <a class="text-on-primary-container/80 hover:text-on-primary-container transition-colors" href="/">Dashboard</a>
+        <a class="text-on-primary-container font-bold border-b-2 border-on-primary-container pb-1" href="/historico">Histórico</a>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 text-on-primary-container text-sm">
+      <span class="hidden sm:inline font-mono text-xs text-on-primary-container/80">{{ dados.data_hora[:19] }}</span>
+      <a href="/" class="bg-on-primary-container/15 hover:bg-on-primary-container/25 px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base">add</span> Nova Análise
+      </a>
+      <button type="button" class="p-2 hover:bg-primary/10 rounded-full transition-all"><span class="material-symbols-outlined">account_circle</span></button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- Ethical Banner (Stitch) -->
+    <div class="p-4 bg-tertiary-fixed border border-tertiary-container rounded-lg flex gap-3 items-start shadow-sm no-print">
+      <span class="material-symbols-outlined text-tertiary-container mt-0.5">warning</span>
+      <p class="text-on-tertiary-fixed text-sm">Esta é uma ferramenta de suporte à decisão baseada em IA e não substitui o diagnóstico clínico realizado por um médico.</p>
+    </div>
+
+    <!-- Modo de análise geral -->
+    <div class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+          {% if pipeline.modo == 'imagem_unica' %}📷
+          {% elif pipeline.modo == 'dataset_rotulado' %}📊
+          {% elif pipeline.modo == 'tabular' %}📄
+          {% elif pipeline.modo == 'multimodal' %}🧠
+          {% elif pipeline.modo == 'sinal_temporal' %}📡
+          {% elif pipeline.modo == 'imagem_dicom_2d' %}🩻
+          {% elif pipeline.modo == 'volume_3d' %}🧊
+          {% elif pipeline.modo == 'multimodal_expandido' %}🔬
+          {% else %}📂
+          {% endif %}
+        </div>
+        <div class="flex-1">
+          <p class="text-[10px] text-teal-600 uppercase tracking-widest font-bold">Modo de Operação</p>
+          <p class="text-lg font-extrabold text-slate-900 leading-snug">
+            {% if pipeline.modo == 'imagem_unica' %}Imagem Única
+            {% elif pipeline.modo == 'dataset_rotulado' %}Dataset Rotulado (Benigno vs Maligno)
+            {% elif pipeline.modo == 'tabular' %}Análise Tabular Completa (CSV/TXT)
+            {% elif pipeline.modo == 'multimodal' %}Análise Multimodal (Imagens + Tabular)
+            {% elif pipeline.modo == 'sinal_temporal' %}Sinal Temporal Fisiológico ({{ pipeline.tipo_sinal or
+            'ECG/EEG/EMG' }})
+            {% elif pipeline.modo == 'imagem_dicom_2d' %}Imagem DICOM 2D ({{ pipeline.tipo_sinal or 'Raio-X / Mamografia
+            / Ultrassom' }})
+            {% elif pipeline.modo == 'volume_3d' %}Volume 3D ({{ pipeline.tipo_sinal or 'TC / RM / PET' }})
+            {% elif pipeline.modo == 'multimodal_expandido' %}Análise Multimodal Expandida (múltiplas famílias)
+            {% else %}Processamento em Lote (Imagens sem Rótulos)
+            {% endif %}
+          </p>
+          <p class="text-xs text-slate-400 mt-1 font-mono truncate max-w-2xl">{{ dados.dataset_path }}</p>
+        </div>
+        <div class="hidden lg:flex items-center gap-6 text-right">
+          {% if pipeline.familia %}
+          <div>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Família</p>
+            <span class="inline-block mt-1 px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-bold border border-teal-100">{{ pipeline.familia }}</span>
+          </div>
+          {% endif %}
+          <div>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Amostras</p>
+            <p class="text-xl font-extrabold text-slate-900 mt-0.5">{{ pipeline.n_imagens }}</p>
+          </div>
+          {% if dados.melhor_modelo and dados.melhor_modelo not in ('N/A', '') %}
+          <div class="bg-teal-50 border border-teal-100 rounded-xl px-4 py-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-teal-600">emoji_events</span>
+            <div class="text-left">
+              <p class="text-[10px] text-teal-600 uppercase tracking-widest font-bold">Melhor Modelo</p>
+              <p class="text-sm font-extrabold text-slate-900 leading-tight">{{ dados.melhor_modelo }}</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegação em Abas (Stitch) -->
+    <div class="border-b border-slate-200 flex flex-wrap gap-8 text-sm">
+      <button onclick="switchTab('tab-estatistica')" data-tab="tab-estatistica"
+        class="tab-btn pb-3 border-b-2 tab-active transition-all focus:outline-none">
+        Estatísticas &amp; Biomarcadores
+      </button>
+      <button onclick="switchTab('tab-pdi')" data-tab="tab-pdi"
+        class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all focus:outline-none">
+        Pré-processamento
+      </button>
+      <button onclick="switchTab('tab-laudo')" data-tab="tab-laudo"
+        class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all focus:outline-none">
+        AutoML
+      </button>
+      <button onclick="switchTab('tab-interativo')" data-tab="tab-interativo"
+        class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all focus:outline-none">
+        Laudo
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 2: PRÉ-PROCESSAMENTO ADAPTATIVO -->
+    <!-- ========================================== -->
+    <div id="tab-pdi" class="tab-pane hidden space-y-8">
+
+      {% if pipeline.estrategia_preproc %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Bloco 1: Estatísticas de PDI da Base -->
+        <div class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-1 h-5 bg-teal-500 rounded-full"></div>
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Metadados Brutos da Base</h3>
+          </div>
+
+          {% if pipeline.estrategia_preproc.eh_sinal %}
+          <dl class="space-y-3.5 text-sm">
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Total de Sinais Processados</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base_sinal.n_sinais }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Tipo de Sinal Detectado</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base_sinal.tipo or '—' }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Taxa de Amostragem</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base_sinal.taxa_amostragem or '—' }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Nº de Canais / Derivações</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base_sinal.n_canais }}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-slate-500">Erros de Leitura</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base_sinal.n_erros }}</dd>
+            </div>
+          </dl>
+          {% elif pipeline.modo != 'tabular' and pipeline.analise_base %}
+          <dl class="space-y-3.5 text-sm">
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Total de Imagens Analisadas</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base.n_imagens_analisadas }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Luminosidade / Intensidade Média</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base.intensidade_media }} ± {{
+                pipeline.analise_base.intensidade_desvio }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Contraste Global Médio</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base.contraste_medio }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Ruído Técnico Estimado (Sigma)</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base.ruido_medio }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Amostras com Outliers (Luz Extrema)</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.analise_base.outliers_intensidade }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Distribuição é Normal? (Shapiro)</dt>
+              <dd class="font-mono font-bold text-xs">
+                {% if pipeline.analise_base.teste_normalidade.eh_normal is none %}
+                <span class="text-slate-400">N/A</span>
+                {% elif pipeline.analise_base.teste_normalidade.eh_normal %}
+                <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Sim (p={{
+                  pipeline.analise_base.teste_normalidade.shapiro_p }})</span>
+                {% else %}
+                <span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Não (p={{
+                  pipeline.analise_base.teste_normalidade.shapiro_p }})</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-slate-500">Dimensões Uniformes</dt>
+              <dd class="font-bold font-mono text-xs">
+                {% if pipeline.analise_base.tamanhos_consistentes %}
+                <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Sim (Consistente)</span>
+                {% else %}
+                <span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Não ({{
+                  pipeline.analise_base.n_tamanhos_unicos }} tamanhos)</span>
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+          {% else %}
+          <dl class="space-y-3.5 text-sm">
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Total de Amostras Clínicas Lidas</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.tabular_stats.n_amostras }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Total de Variáveis Clínicas (Features)</dt>
+              <dd class="text-slate-900 font-bold font-mono">{{ pipeline.tabular_stats.n_features }}</dd>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <dt class="text-slate-500">Coluna Alvo (Target)</dt>
+              <dd class="text-slate-900 font-bold font-mono truncate max-w-[200px]">{{
+                pipeline.schema_tabular.label_name or 'Não fornecida' }}</dd>
+            </div>
+          </dl>
+          {% endif %}
+        </div>
+
+        <!-- Bloco 2: Pipeline de Decisão Proposta -->
+        <div class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-1 h-5 bg-teal-500 rounded-full"></div>
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Estratégias de Pré-Processamento
+              Propostas</h3>
+          </div>
+
+          {% if pipeline.estrategia_preproc.eh_sinal %}
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Filtragem</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">{{ pipeline.estrategia_preproc.filtragem or '—' }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Reamostragem</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">{{ pipeline.estrategia_preproc.reamostragem or '—' }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Normalização</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">{{ pipeline.estrategia_preproc.normalizacao or '—' }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Janelamento</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">{{ pipeline.estrategia_preproc.janela or '—' }}</p>
+            </div>
+          </div>
+          {% elif pipeline.modo != 'tabular' %}
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Filtro de Ruído</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">
+                {% if pipeline.estrategia_preproc.denoising == 'nlmeans' %}Non-Local Means (Suave)
+                {% else %}Filtro Gaussiano (5x5){% endif %}
+              </p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Normalização</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">
+                {% if pipeline.estrategia_preproc.normalizacao == 'percentil' %}Percentil 1-99%
+                {% else %}Min-Max Padrão{% endif %}
+              </p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Equalização</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">
+                {% if pipeline.estrategia_preproc.equalizacao == 'clahe' %}Equalização CLAHE
+                {% else %}Nenhuma (Adequado){% endif %}
+              </p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Redimensionamento</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">
+                Obrigatório ({{ pipeline.estrategia_preproc.tamanho_alvo[0] }}x{{
+                pipeline.estrategia_preproc.tamanho_alvo[1] }})
+              </p>
+            </div>
+          </div>
+          {% else %}
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Tratamento de Nulos</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">
+                {% if pipeline.estrategia_preproc.imputacao == 'median' %}Imputação por Mediana
+                {% else %}Nenhum Nulo (Perfeito){% endif %}
+              </p>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <p class="text-[10px] text-slate-400 uppercase font-bold">Escalamento de Atributos</p>
+              <p class="text-sm font-extrabold text-slate-800 mt-1">
+                {% if pipeline.estrategia_preproc.escalamento == 'robust' %}RobustScaler (Mediana/IQR)
+                {% else %}StandardScaler (Z-score){% endif %}
+              </p>
+            </div>
+          </div>
+          {% endif %}
+
+          <h4 class="text-xs uppercase text-slate-400 font-bold mb-3">Justificativas dos Agentes de Engenharia</h4>
+          <ul class="space-y-2 text-xs text-slate-600">
+            {% for j in pipeline.estrategia_preproc.justificativas %}
+            <li class="flex gap-2 items-start bg-slate-50 rounded-lg p-2.5 border border-slate-100/50">
+              <span class="text-teal-600 font-black">✓</span>
+              <span>{{ j }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% else %}
+      <div class="premium-card bg-white rounded-2xl p-8 text-center shadow-sm">
+        <p class="text-slate-400 text-sm">Esta run não executou nenhum pipeline de pré-processamento adaptativo.</p>
+      </div>
+      {% endif %}
+
+      <!-- Engenharia de Features (derivadas das imagens pré-processadas) -->
+      <div id="secao-features-engenharia" class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-1">
+          <div class="w-1 h-5 bg-teal-500 rounded-full"></div>
+          <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">🔬 Engenharia de Features</h3>
+        </div>
+        <p class="text-xs text-slate-400 ml-4 mb-4">
+          Features derivadas dos dados pré-processados (biomarcadores de sinal, ou Sobel/histograma/LBP/quadrantes
+          para imagens), ordenadas por importância.
+        </p>
+
+        <!-- Estado vazio: análise sem features derivadas -->
+        <div id="fe-vazio" class="hidden bg-slate-50/50 rounded-xl p-6 border border-slate-100/60 text-center text-sm text-slate-400 ml-4">
+          Nenhuma feature derivada disponível para esta análise.
+        </div>
+
+        <!-- Conteúdo: preenchido via JS quando há features -->
+        <div id="fe-conteudo" class="hidden">
+          <div class="flex flex-wrap items-center gap-2 mb-4 ml-4">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Método</span>
+            <span id="fe-metodo" class="text-xs font-mono font-bold text-teal-700 bg-teal-50 border border-teal-100 rounded-lg px-2.5 py-1">—</span>
+            <span id="fe-amostras" class="text-xs text-slate-400"></span>
+          </div>
+
+          <div class="bg-slate-50/50 rounded-xl p-3 border border-slate-100/60 mb-5">
+            <h4 class="text-[10px] uppercase text-slate-400 font-bold mb-2 ml-1">Features mais importantes</h4>
+            <div id="chart-features-imp" style="min-height:340px"></div>
+          </div>
+
+          <h4 class="text-[10px] uppercase text-slate-400 font-bold mb-3 ml-1">Valores médios da amostra</h4>
+          <div id="grid-features-engenharia" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 1: ESTATÍSTICAS & BIOMARCADORES -->
+    <!-- ========================================== -->
+    <div id="tab-estatistica" class="tab-pane space-y-8">
+
+      <!-- Seção Tabular Completa (31 Métricas & Correlações) -->
+      {% if pipeline.tabular_stats %}
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Sidebar com as colunas (Features) -->
+        <div class="lg:col-span-1 space-y-4">
+          <div class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Variáveis Clínicas</h3>
+            <p class="text-xs text-slate-400 mb-4">Selecione uma variável para abrir o dossiê completo de suas 31
+              métricas estatísticas:</p>
+
+            <div class="space-y-2">
+              {% for fname, fstats in pipeline.tabular_stats.features.items() %}
+              <button onclick="selectFeature('{{ loop.index0 }}')" id="btn-feat-{{ loop.index0 }}"
+                class="feature-btn w-full text-left px-4 py-3 rounded-xl border border-slate-100 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all flex justify-between items-center">
+                <span class="truncate max-w-[200px]">{{ fname }}</span>
+                <span class="font-mono text-[10px] text-slate-400">Mediana: {{ fstats.mediana }}</span>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Testes de Hipótese por Grupo (Global) -->
+          <div class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Normalidade & Hipóteses</h3>
+            <p class="text-xs text-slate-400 mb-4">Análise inferencial geral do dataset.</p>
+            <div class="space-y-3.5 text-xs">
+              <div class="bg-teal-50/50 rounded-xl p-3 border border-teal-100/50">
+                <p class="font-bold text-teal-800">Mapeamento de Nulos</p>
+                <p class="text-slate-600 mt-1 leading-normal">Os valores ausentes foram mapeados e medidos sobre a base
+                  *bruta*, sendo imputados cientificamente por **mediana adaptativa** após a análise.</p>
+              </div>
+              <div class="bg-indigo-50/50 rounded-xl p-3 border border-indigo-100/50">
+                <p class="font-bold text-indigo-800">Classe Alvo (Target)</p>
+                <p class="text-slate-600 mt-1 leading-normal">Coluna: <strong class="font-mono">{{
+                    pipeline.schema_tabular.label_name or 'Não fornecida' }}</strong></p>
+                {% if pipeline.tabular_stats.distribuicao_labels %}
+                <div class="flex gap-2 mt-2">
+                  {% for label, count in pipeline.tabular_stats.distribuicao_labels.items() %}
+                  <span
+                    class="px-2 py-0.5 rounded text-[10px] font-mono bg-white border border-indigo-100 {% if label == 1 %}text-rose-600{% else %}text-emerald-600{% endif %}">
+                    Classe {{ label }}: {{ count }}
+                  </span>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel Central de Métricas da Feature Selecionada -->
+        <div class="lg:col-span-2 space-y-6">
+
+          {% for fname, fstats in pipeline.tabular_stats.features.items() %}
+          <div id="feat-panel-{{ loop.index0 }}" class="feature-panel hidden space-y-6">
+
+            <div class="premium-card bg-white rounded-2xl p-6 shadow-sm">
+              <div class="flex items-center gap-3">
+                <div class="w-1 h-5 bg-teal-500 rounded-full"></div>
+                <h3 class="text-base font-extrabold text-slate-800">Dossiê Estatístico (Bruto): <span
+                    class="text-teal-600">{{ fname }}</span></h3>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- 1. Medidas de Tendência Central & Dispersão -->
+              <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-4">
+                <h4 class="text-xs uppercase text-slate-400 font-bold tracking-wider">Tendência Central & Dispersão</h4>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Média</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.media }}</p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Mediana</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.mediana }}</p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Moda</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.moda }}</p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Desvio Padrão</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.desvio }}</p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Variância</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.variancia }}</p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Coef. Variação (CV)</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.coeficiente_variacao }}
+                    </p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">Amplitude (Range)</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.amplitude }}</p>
+                  </div>
+                  <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <p class="text-[10px] text-slate-400 uppercase">IQR (Interquartil)</p>
+                    <p class="text-sm font-extrabold mt-0.5 font-mono text-slate-800">{{ fstats.iqr }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Posição (Quartis, Percentis, Decis) -->
+              <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-4">
+                <h4 class="text-xs uppercase text-slate-400 font-bold tracking-wider">Medidas de Posição</h4>
+                <div class="space-y-2.5 text-xs">
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Quartis (Q1, Q2, Q3)</span>
+                    <span class="font-mono font-bold text-slate-700">{{ fstats.quartis | join(', ') }}</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Percentis Principais (P10, P90)</span>
+                    <span class="font-mono font-bold text-slate-700">P10: {{ fstats.percentis.P10 }} | P90: {{
+                      fstats.percentis.P90 }}</span>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold">Decis (D1 a D9)</p>
+                    <p class="font-mono font-bold text-[10px] text-teal-600 bg-slate-50 p-2 rounded-lg leading-normal">
+                      {{ fstats.decis | join(' | ') }}</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- 3. Forma & Outliers & Distribuição -->
+              <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-4">
+                <h4 class="text-xs uppercase text-slate-400 font-bold tracking-wider">Distribuição & Outliers</h4>
+                <dl class="space-y-2 text-xs">
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Assimetria (Skewness)</span>
+                    <span class="font-mono font-bold text-slate-700">{{ fstats.assimetria }}</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Curtose (Kurtosis)</span>
+                    <span class="font-mono font-bold text-slate-700">{{ fstats.curtose }}</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Relação Sinal-Ruído (SNR)</span>
+                    <span class="font-mono font-bold text-slate-700">{{ fstats.snr }}</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Entropia / Uniformidade</span>
+                    <span class="font-mono font-bold text-slate-700">{{ fstats.entropia }} / {{ fstats.uniformidade
+                      }}</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Outliers por Regra IQR</span>
+                    <span class="font-mono font-bold text-rose-600">{{ fstats.outliers_iqr }} detectados</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                    <span class="text-slate-500">Outliers por Z-score (>2.5)</span>
+                    <span class="font-mono font-bold text-rose-600">{{ fstats.outliers_zscore }} detectados</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Valores Ausentes na Base</span>
+                    <span class="font-mono font-bold text-amber-600">{{ fstats.n_nulos }} células vazias</span>
+                  </div>
+                </dl>
+              </div>
+
+              <!-- 4. Normalidade (Shapiro e KS) -->
+              <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-4">
+                <h4 class="text-xs uppercase text-slate-400 font-bold tracking-wider">Testes de Normalidade</h4>
+                <div class="space-y-3.5 text-xs">
+                  <div
+                    class="p-3 rounded-xl border {% if fstats.normalidade.shapiro.eh_normal %}bg-emerald-50/50 border-emerald-100{% else %}bg-amber-50/50 border-amber-100{% endif %}">
+                    <p
+                      class="font-bold {% if fstats.normalidade.shapiro.eh_normal %}text-emerald-800{% else %}text-amber-800{% endif %}">
+                      Teste de Shapiro-Wilk</p>
+                    <p class="text-slate-500 text-[10px] mt-0.5">Indicado para amostras pequenas/médias.</p>
+                    <div class="flex justify-between mt-2 font-mono text-[10px] font-bold text-slate-700">
+                      <span>p-valor: {{ fstats.normalidade.shapiro.p_valor }}</span>
+                      <span>É Normal? {% if fstats.normalidade.shapiro.eh_normal %}SIM ✓{% else %}NÃO ✗{% endif
+                        %}</span>
+                    </div>
+                  </div>
+                  <div
+                    class="p-3 rounded-xl border {% if fstats.normalidade.ks.eh_normal %}bg-emerald-50/50 border-emerald-100{% else %}bg-amber-50/50 border-amber-100{% endif %}">
+                    <p
+                      class="font-bold {% if fstats.normalidade.ks.eh_normal %}text-emerald-800{% else %}text-amber-800{% endif %}">
+                      Teste de Kolmogorov-Smirnov</p>
+                    <p class="text-slate-500 text-[10px] mt-0.5">Indicado para amostras grandes.</p>
+                    <div class="flex justify-between mt-2 font-mono text-[10px] font-bold text-slate-700">
+                      <span>p-valor: {{ fstats.normalidade.ks.p_valor }}</span>
+                      <span>É Normal? {% if fstats.normalidade.ks.eh_normal %}SIM ✓{% else %}NÃO ✗{% endif %}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- 5. Diferenças por Grupo & Testes Clínicos de Significância -->
+            {% if fstats.por_grupo %}
+            <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-4">
+              <h4 class="text-xs uppercase text-slate-400 font-bold tracking-wider">Estatísticas por Grupo &
+                Significação Clínica</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+
+                <div class="space-y-3">
+                  <p class="text-[10px] text-slate-400 uppercase font-bold">Média & Desvio por Classe</p>
+                  {% for grp, gstats in fstats.por_grupo.items() %}
+                  <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <span class="font-bold text-slate-700">Classe {{ grp }}</span>
+                    <span class="font-mono text-slate-600">Média: {{ gstats.media }} | Desvio: {{ gstats.desvio
+                      }}</span>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="space-y-3">
+                  <p class="text-[10px] text-slate-400 uppercase font-bold">Análise Inferencial de Relevância</p>
+                  {% if fstats.testes_hipotese.teste_t %}
+                  <div
+                    class="p-3 rounded-xl border {% if fstats.testes_hipotese.teste_t.diferenca_significativa %}bg-rose-50/50 border-rose-100 text-rose-800{% else %}bg-slate-50 border-slate-100 text-slate-700{% endif %}">
+                    <p class="font-bold">Teste t de Student (Independente)</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Mede a diferença estatística entre as duas classes.</p>
+                    <div class="flex justify-between mt-2 font-mono text-[10px] font-bold">
+                      <span>p-valor: {{ fstats.testes_hipotese.teste_t.p_valor }}</span>
+                      <span>Diferença Relevante? {% if fstats.testes_hipotese.teste_t.diferenca_significativa %}SIM ✓{%
+                        else %}NÃO{% endif %}</span>
+                    </div>
+                  </div>
+                  {% elif fstats.testes_hipotese.anova %}
+                  <div
+                    class="p-3 rounded-xl border {% if fstats.testes_hipotese.anova.diferenca_significativa %}bg-rose-50/50 border-rose-100 text-rose-800{% else %}bg-slate-50 border-slate-100 text-slate-700{% endif %}">
+                    <p class="font-bold">Análise de Variância (ANOVA)</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Mede a variabilidade entre múltiplos grupos.</p>
+                    <div class="flex justify-between mt-2 font-mono text-[10px] font-bold">
+                      <span>p-valor: {{ fstats.testes_hipotese.anova.p_valor }}</span>
+                      <span>Diferença Relevante? {% if fstats.testes_hipotese.anova.diferenca_significativa %}SIM ✓{%
+                        else %}NÃO{% endif %}</span>
+                    </div>
+                  </div>
+                  {% else %}
+                  <p class="text-slate-400">Dados insuficientes para rodar testes de significância por grupo.</p>
+                  {% endif %}
+                </div>
+
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+          {% endfor %}
+
+          <!-- Matriz de Correlação Multivariada (Heatmap) -->
+          {% if pipeline.correlacoes %}
+          <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-6">
+            <div>
+              <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Matriz de Correlação Cruzada
+                (Pearson / Spearman)</h3>
+              <p class="text-xs text-slate-400 mt-1">Valores perto de 1 indicam correlação positiva perfeita; perto de
+                -1 indicam correlação negativa perfeita.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-[10px] font-mono text-center border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-100">
+                    <th class="p-2 text-left text-slate-500 font-bold uppercase tracking-wider">Feature</th>
+                    {% for name in pipeline.tabular_stats.feature_names %}
+                    <th class="p-2 text-slate-500 font-bold select-none cursor-help truncate max-w-[80px]"
+                      title="{{ name }}">{{ name[:8] }}..</th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for rname in pipeline.tabular_stats.feature_names %}
+                  {% set r_idx = loop.index0 %}
+                  <tr class="border-b border-slate-100/50">
+                    <td class="p-2 text-left font-bold text-slate-700 max-w-[120px] truncate" title="{{ rname }}">{{
+                      rname }}</td>
+                    {% for cname in pipeline.tabular_stats.feature_names %}
+                    {% set c_idx = loop.index0 %}
+                    {% set corr_val = pipeline.correlacoes.pearson[r_idx][c_idx] | round(2) %}
+
+                    <!-- Pintura do heatmap via inline CSS -->
+                    <td class="p-2.5 font-bold text-slate-900 border border-slate-50" style="
+                          {% if corr_val > 0 %}
+                            background-color: rgba(13, 148, 136, {{ corr_val }});
+                            color: {% if corr_val > 0.5 %}#fff{% else %}#1e293b{% endif %};
+                          {% elif corr_val < 0 %}
+                            background-color: rgba(239, 68, 68, {{ corr_val | abs }});
+                            color: {% if corr_val | abs > 0.5 %}#fff{% else %}#1e293b{% endif %};
+                          {% else %}
+                            background-color: #fff;
+                          {% endif %}
+                        ">
+                      {{ corr_val }}
+                    </td>
+                    {% endfor %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+      {% else %}
+
+      {% if pipeline.dados_viz %}
+      <!-- Preview do sinal (downsampled) para famílias F1/F3/F4 -->
+      <div class="premium-card bg-white rounded-2xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-1 h-5 bg-teal-500 rounded-full"></div>
+          <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">
+            Prévia do Sinal {{ pipeline.tipo_sinal }}{% if pipeline.canais %} · {{ pipeline.canais|length }} canal(is){% endif %}
+          </h3>
+        </div>
+        <div id="chart-sinal-preview" class="h-72 w-full"></div>
+      </div>
+      {% endif %}
+
+      <!-- Bento Estatísticas (layout Stitch) — imagem/sinal -->
+      <div class="grid grid-cols-12 gap-5">
+
+        <!-- Biomarcadores por Amostra (span 8) -->
+        <section class="col-span-12 lg:col-span-8 premium-card bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
+          <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-slate-900">Biomarcadores por Amostra</h3>
+            <span class="material-symbols-outlined text-slate-300">table_rows</span>
+          </div>
+          <div class="overflow-x-auto flex-grow max-h-[420px]">
+            <table class="w-full text-left text-sm" style="font-variant-numeric:tabular-nums">
+              <thead class="bg-slate-50 sticky top-0 z-10">
+                <tr id="head-bio-amostra" class="text-[11px] uppercase tracking-wide text-slate-500"></tr>
+              </thead>
+              <tbody id="tbody-bio-amostra" class="divide-y divide-slate-50"></tbody>
+            </table>
+          </div>
+          <p id="bio-amostra-vazio" class="hidden p-6 text-center text-sm text-slate-400">Sem amostras individuais para exibir nesta análise.</p>
+        </section>
+
+        <!-- Distribuição por Classe (span 4) -->
+        <section class="col-span-12 lg:col-span-4 premium-card bg-white rounded-2xl p-6 shadow-sm flex flex-col">
+          <h3 class="text-xl font-bold text-slate-900 mb-1">Distribuição por Classe</h3>
+          <p class="text-xs text-slate-400 mb-2">Boxplot dos biomarcadores por categoria</p>
+          <div id="chart-boxplot" class="flex-grow min-h-[300px] w-full"></div>
+        </section>
+
+        <!-- Resumo do Dataset (span 4) -->
+        <section class="col-span-12 md:col-span-4 premium-card bg-white rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="material-symbols-outlined text-teal-600">schema</span>
+            <h3 class="text-xl font-bold text-slate-900">Resumo do Dataset</h3>
+          </div>
+          <ul class="space-y-3 text-sm">
+            <li class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span class="text-slate-500">Família</span><span class="font-bold text-slate-800">{{ pipeline.familia or '—' }}</span>
+            </li>
+            <li class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span class="text-slate-500">Tipo</span><span class="font-bold text-slate-800">{{ pipeline.tipo_sinal or pipeline.modo or '—' }}</span>
+            </li>
+            <li class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span class="text-slate-500">Amostras</span><span class="font-bold text-slate-800">{{ pipeline.n_imagens }}</span>
+            </li>
+            {% if pipeline.canais %}
+            <li class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span class="text-slate-500">Canais</span><span class="font-bold text-slate-800">{{ pipeline.canais|length }}</span>
+            </li>
+            {% endif %}
+            <li class="flex justify-between items-center">
+              <span class="text-slate-500">Categorias</span>
+              <span class="font-bold text-slate-800">{{ pipeline.estatisticas.keys()|list|join(', ') if pipeline.estatisticas else '—' }}</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Estatísticas Descritivas dos Biomarcadores (span 8) -->
+        <section class="col-span-12 md:col-span-8 premium-card bg-white rounded-2xl p-6 shadow-sm">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Estatísticas Descritivas dos Biomarcadores</h3>
+          {% if pipeline.estatisticas %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                  <th class="pb-3 text-left font-semibold">Categoria</th>
+                  <th class="pb-3 text-left font-semibold">Biomarcador</th>
+                  <th class="pb-3 text-right font-semibold">N</th>
+                  <th class="pb-3 text-right font-semibold">Média</th>
+                  <th class="pb-3 text-right font-semibold">Mediana</th>
+                  <th class="pb-3 text-right font-semibold">Desvio</th>
+                  <th class="pb-3 text-right font-semibold">Min</th>
+                  <th class="pb-3 text-right font-semibold">Max</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cat, dados_cat in pipeline.estatisticas.items() %}
+                {% for campo, stats in dados_cat.campos.items() %}
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50">
+                  {% if loop.first %}
+                  <td rowspan="{{ dados_cat.campos|length }}" class="py-2 align-top">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
+                        {% if cat == 'MALIGNO' %}bg-rose-100 text-rose-700
+                        {% elif cat == 'BENIGNO' %}bg-emerald-100 text-emerald-700
+                        {% else %}bg-slate-100 text-slate-700{% endif %}">
+                      {{ cat }}
+                    </span>
+                  </td>
+                  {% endif %}
+                  <td class="py-2 text-slate-700 font-medium capitalize">{{ campo }}</td>
+                  <td class="py-2 text-right text-slate-400 font-mono">{{ dados_cat.n }}</td>
+                  <td class="py-2 text-right text-slate-700 font-mono">{{ stats.media }}</td>
+                  <td class="py-2 text-right text-slate-700 font-mono">{{ stats.mediana }}</td>
+                  <td class="py-2 text-right text-slate-400 font-mono">{{ stats.desvio }}</td>
+                  <td class="py-2 text-right text-slate-400 font-mono">{{ stats.min }}</td>
+                  <td class="py-2 text-right text-slate-400 font-mono">{{ stats.max }}</td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-sm text-slate-400">Sem estatísticas descritivas disponíveis para esta análise.</p>
+          {% endif %}
+        </section>
+
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 3: AUTOML & LAUDO IA -->
+    <!-- ========================================== -->
+    <div id="tab-laudo" class="tab-pane hidden space-y-8">
+
+      <!-- ===== AutoML (layout Stitch — Bento Grid) ===== -->
+      {% if pipeline.metricas and pipeline.melhor_modelo %}
+      {% set melhor = pipeline.melhor_modelo %}
+      {% set mv = pipeline.metricas[melhor] %}
+      {% set cm = (pipeline.confusion_matrix or {}).get(melhor) %}
+      {% macro fmt3(v) %}{% if v is defined and v is not none %}{{ '%.3f'|format(v) }}{% else %}—{% endif %}{% endmacro %}
+
+      <div class="grid grid-cols-12 gap-5">
+
+        <!-- Pódio dos modelos — Ranking (span 8) -->
+        <section class="col-span-12 lg:col-span-8 premium-card bg-white rounded-2xl overflow-hidden flex flex-col shadow-sm">
+          {% macro fmtpct(v) %}{% if v is defined and v is not none %}{{ '%.1f'|format(v * 100) }}%{% else %}—{% endif %}{% endmacro %}
+          {% macro fmtms(v) %}{% if v is defined and v is not none %}{{ v }} ms{% else %}—{% endif %}{% endmacro %}
+          {% macro pctcolor(v) %}{% if v is defined and v is not none %}{% if v >= 0.8 %}text-emerald-700{% elif v < 0.6 %}text-rose-600{% else %}text-slate-800{% endif %}{% else %}text-slate-400{% endif %}{% endmacro %}
+          {% set ranking = pipeline.metricas.items()|sort(attribute='1.score_clinico', reverse=true) %}
+          {% set medalhas = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'] %}
+
+          <div class="p-6 border-b border-slate-100">
+            <div class="flex justify-between items-center mb-5">
+              <h2 class="text-xl font-bold text-slate-900">AutoML — Bateria de {{ pipeline.metricas|length }} Classificadores</h2>
+              <span class="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-semibold">{{ pipeline.metricas|length }} Classificadores</span>
+            </div>
+
+            <!-- Card herói do vencedor -->
+            {% set piso_ok = pipeline.piso_sensibilidade_atingido if pipeline.piso_sensibilidade_atingido is defined else true %}
+            <div class="flex flex-wrap items-center gap-4 {% if piso_ok %}bg-teal-50/60 border-teal-100{% else %}bg-amber-50 border-amber-200{% endif %} border rounded-xl p-4">
+              <span class="text-3xl">{% if piso_ok %}🏆{% else %}⚠️{% endif %}</span>
+              <div class="flex-1 min-w-[180px]">
+                <p class="text-[10px] {% if piso_ok %}text-teal-700{% else %}text-amber-700{% endif %} uppercase font-bold tracking-wide">
+                  {% if piso_ok %}Vencedor — Score Clínico Multiobjetivo{% else %}Nenhum modelo atingiu o piso clínico de segurança{% endif %}
+                </p>
+                <p class="text-2xl font-extrabold text-slate-900">{{ melhor }}</p>
+                <p class="text-[11px] {% if piso_ok %}text-slate-500{% else %}text-amber-800{% endif %} mt-0.5">
+                  {% if pipeline.criterio_selecao %}{{ pipeline.criterio_selecao }}{% else %}Combina AUC + MCC − ECE, com piso de Sensibilidade ≥ 0.80 · 5-fold StratifiedKFold + teste 20%.{% endif %}
+                </p>
+                {% if not piso_ok and pipeline.aviso_piso_sensibilidade %}
+                <p class="text-[11px] text-amber-800 mt-2 bg-amber-100 border border-amber-200 rounded-lg px-3 py-2">
+                  ⚠️ {{ pipeline.aviso_piso_sensibilidade }}
+                </p>
+                {% endif %}
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <div class="bg-white rounded-lg px-3 py-2 text-center border border-slate-100">
+                  <p class="text-[9px] text-slate-400 uppercase font-bold">Acurácia</p>
+                  <p class="font-mono font-extrabold text-sm text-slate-800">{{ fmtpct(mv.acuracia) }}</p>
+                </div>
+                <div class="bg-white rounded-lg px-3 py-2 text-center border border-slate-100">
+                  <p class="text-[9px] text-slate-400 uppercase font-bold">F1-Score</p>
+                  <p class="font-mono font-extrabold text-sm text-slate-800">{{ fmtpct(mv.f1) }}</p>
+                </div>
+                <div class="bg-white rounded-lg px-3 py-2 text-center border border-slate-100">
+                  <p class="text-[9px] text-slate-400 uppercase font-bold">AUC-ROC</p>
+                  <p class="font-mono font-extrabold text-sm text-slate-800">{{ fmtpct(mv.auc) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dossiê clínico do vencedor -->
+            <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wide mt-5 mb-2">Dossiê clínico do modelo vencedor</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {% for label, v, raw in [
+                ('Sensibilidade', mv.sensibilidade, false),
+                ('Especificidade', mv.especificidade, false),
+                ('Precisão (VPP)', mv.precisao, false),
+                ('Recall (VPN proxy)', mv.recall, false),
+                ('F1-Score', mv.f1, false),
+                ('AUC-ROC', mv.auc, false),
+                ('ECE (Calibração)', mv.ece, false),
+                ('Latência (ms)', mv.latencia_inferencia_ms, true),
+              ] %}
+              <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">{{ label }}</p>
+                <p class="text-lg font-extrabold font-mono {% if raw %}text-slate-800{% else %}{{ pctcolor(v) }}{% endif %}">
+                  {% if raw %}{{ fmtms(v) }}{% else %}{{ fmtpct(v) }}{% endif %}
+                </p>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Ranking completo -->
+          <div class="p-6 space-y-3">
+            <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wide mb-1">Ranking completo dos {{ pipeline.metricas|length }} modelos</p>
+            {% for nome, m in ranking %}
+            {% set isWinner = (nome == melhor) %}
+            <div class="border {% if isWinner %}border-teal-300 bg-teal-50/30{% else %}border-slate-100 bg-white{% endif %} rounded-xl p-4 flex flex-wrap items-center gap-4 transition-all hover:shadow-sm">
+              <span class="text-xl w-6 text-center">{{ medalhas[loop.index0] if loop.index0 < 6 else (loop.index ~ 'º') }}</span>
+              <div class="flex-1 min-w-[140px]">
+                <p class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                  {{ nome }}
+                  {% if isWinner %}<span class="px-2 py-0.5 rounded-full bg-teal-600 text-white text-[9px] font-black uppercase">Vencedor</span>{% endif %}
+                </p>
+                <p class="text-[10px] text-slate-400">Treino: {{ m.tempo_treino_s if m.tempo_treino_s is defined else '—' }}s</p>
+              </div>
+              <div class="grid grid-cols-4 gap-3 text-center shrink-0">
+                <div><p class="text-[9px] text-slate-400 uppercase font-bold">AUC</p><p class="font-mono font-extrabold text-xs {{ pctcolor(m.auc) }}">{{ fmtpct(m.auc) }}</p></div>
+                <div><p class="text-[9px] text-slate-400 uppercase font-bold">Sensib.</p><p class="font-mono font-extrabold text-xs {{ pctcolor(m.sensibilidade) }}">{{ fmtpct(m.sensibilidade) }}</p></div>
+                <div><p class="text-[9px] text-slate-400 uppercase font-bold">Especif.</p><p class="font-mono font-extrabold text-xs {{ pctcolor(m.especificidade) }}">{{ fmtpct(m.especificidade) }}</p></div>
+                <div><p class="text-[9px] text-slate-400 uppercase font-bold">F1</p><p class="font-mono font-extrabold text-xs {{ pctcolor(m.f1) }}">{{ fmtpct(m.f1) }}</p></div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-center shrink-0">
+                <div><p class="text-[9px] text-slate-400 uppercase font-bold">ECE</p><p class="font-mono text-xs text-slate-600">{{ fmtpct(m.ece) }}</p></div>
+                <div><p class="text-[9px] text-slate-400 uppercase font-bold">ms/amostra</p><p class="font-mono text-xs text-slate-600">{{ m.latencia_inferencia_ms if m.latencia_inferencia_ms is defined else '—' }}</p></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if pipeline.llm_timing or pipeline.tempo_pipeline %}
+          <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/60">
+            <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wide mb-2">Tempo de execução (medido)</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <p class="text-[9px] text-slate-400 uppercase font-bold">Geração do laudo (LLM)</p>
+                <p class="font-mono font-bold text-sm text-slate-800">
+                  {{ '%.2f'|format(pipeline.llm_timing.tempo_geracao_s) + 's' if pipeline.llm_timing and pipeline.llm_timing.tempo_geracao_s is not none else '—' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-[9px] text-slate-400 uppercase font-bold">Throughput (tokens/s)</p>
+                <p class="font-mono font-bold text-sm text-slate-800">
+                  {{ pipeline.llm_timing.throughput_tokens_s if pipeline.llm_timing and pipeline.llm_timing.throughput_tokens_s is not none else '—' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-[9px] text-slate-400 uppercase font-bold">AutoML + orquestração</p>
+                <p class="font-mono font-bold text-sm text-slate-800">
+                  {% set t_laudo = pipeline.tempo_pipeline.marcos_s.llm_laudo_pronto if pipeline.tempo_pipeline and pipeline.tempo_pipeline.marcos_s else none %}
+                  {% set t_total = pipeline.tempo_pipeline.tempo_total_s if pipeline.tempo_pipeline else none %}
+                  {{ '%.2f'|format(t_total - t_laudo) + 's' if t_laudo is not none and t_total is not none else '—' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-[9px] text-slate-400 uppercase font-bold">Tempo total (fim-a-fim)</p>
+                <p class="font-mono font-bold text-sm text-slate-800">
+                  {{ '%.2f'|format(pipeline.tempo_pipeline.tempo_total_s) + 's' if pipeline.tempo_pipeline and pipeline.tempo_pipeline.tempo_total_s is not none else '—' }}
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </section>
+
+        {% if pipeline.modo in ('multimodal', 'multimodal_expandido') and pipeline.alinhamento_multimodal %}
+        <!-- Fusão Multimodal (span 12) -->
+        <section class="col-span-12 premium-card bg-white rounded-2xl p-6 shadow-sm">
+          <h2 class="text-xl font-bold text-slate-900 mb-4">Fusão Multimodal (Imagem + Tabular)</h2>
+
+          {% if not pipeline.alinhamento_multimodal.alinhado %}
+          <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <span class="text-xl">⚠️</span>
+            <div>
+              <p class="text-sm font-bold text-amber-800 mb-1">Fusão não realizada — modalidades não alinhadas</p>
+              <p class="text-sm text-amber-800">{{ pipeline.alinhamento_multimodal.motivo }}</p>
+              <p class="text-[11px] text-amber-700 mt-2">As duas modalidades ainda foram analisadas separadamente (ver AutoML acima e métricas tabulares).</p>
+            </div>
+          </div>
+          {% elif pipeline.fusao_multimodal and pipeline.fusao_multimodal.metricas %}
+            {% set fm = pipeline.fusao_multimodal %}
+            {% set rotulos_modalidade = {'imagem': '📷 Imagem', 'tabular': '📋 Tabular', 'sinal_temporal': '💓 Sinal', 'dicom': '🖼️ DICOM', 'volume_3d': '🧊 Volume 3D'} %}
+            <p class="text-[11px] text-slate-400 mb-4">
+              {{ pipeline.alinhamento_multimodal.n_pareados }} amostras casadas entre
+              {{ fm.modalidades|map('replace', '_', ' ')|list|join(' + ') }}{% if pipeline.alinhamento_multimodal.coluna_id_tabular %}
+              (coluna "{{ pipeline.alinhamento_multimodal.coluna_id_tabular }}"){% endif %}.
+              Pesos de confiabilidade (AUC − ECE, via CV interna):
+              {% for nome in fm.modalidades %}{{ rotulos_modalidade.get(nome, nome) }} {{ '%.0f'|format(fm.pesos_confiabilidade[nome] * 100) }}%{% if not loop.last %} · {% endif %}{% endfor %}.
+            </p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm" style="font-variant-numeric:tabular-nums">
+                <thead class="bg-slate-50">
+                  <tr class="text-[11px] uppercase tracking-wide text-slate-500">
+                    <th class="px-4 py-3 font-semibold">Candidato</th>
+                    <th class="px-4 py-3 font-semibold">AUC</th>
+                    <th class="px-4 py-3 font-semibold">Sens.</th>
+                    <th class="px-4 py-3 font-semibold">Espec.</th>
+                    <th class="px-4 py-3 font-semibold">MCC</th>
+                    <th class="px-4 py-3 font-semibold">ECE</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  {% for nome, m in fm.metricas.items() %}
+                  {% set rotulos = {'imagem': '📷 Imagem (isolada)', 'tabular': '📋 Tabular (isolada)', 'sinal_temporal': '💓 Sinal (isolado)', 'dicom': '🖼️ DICOM (isolado)', 'volume_3d': '🧊 Volume 3D (isolado)', 'fusao_media_ponderada': '⚖️ Fusão — média ponderada', 'fusao_stacking': '🧩 Fusão — stacking'} %}
+                  <tr class="{% if nome == fm.melhor_modelo %}bg-teal-50/60{% endif %}">
+                    <td class="px-4 py-3 font-medium {% if nome == fm.melhor_modelo %}text-teal-700 font-bold{% else %}text-slate-700{% endif %}">
+                      {{ rotulos.get(nome, nome) }}{% if nome == fm.melhor_modelo %} <span class="ml-1 px-2 py-0.5 rounded-full bg-teal-600 text-white text-[9px] font-black uppercase align-middle">Vencedor</span>{% endif %}
+                    </td>
+                    <td class="px-4 py-3 font-mono">{{ '%.3f'|format(m.auc) }}</td>
+                    <td class="px-4 py-3 font-mono">{{ '%.3f'|format(m.sensibilidade) }}</td>
+                    <td class="px-4 py-3 font-mono">{{ '%.3f'|format(m.especificidade) }}</td>
+                    <td class="px-4 py-3 font-mono">{{ '%.3f'|format(m.mcc) }}</td>
+                    <td class="px-4 py-3 font-mono">{{ '%.3f'|format(m.ece) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% if not fm.piso_sensibilidade_atingido %}
+            <p class="text-[11px] text-amber-700 mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              ⚠️ {{ fm.aviso_piso_sensibilidade }}
+            </p>
+            {% endif %}
+          {% elif pipeline.alinhamento_multimodal.motivo_fusao_nao_calculada %}
+          <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <span class="text-xl">⚠️</span>
+            <div>
+              <p class="text-sm font-bold text-amber-800 mb-1">Fusão não calculada</p>
+              <p class="text-sm text-amber-800">{{ pipeline.alinhamento_multimodal.motivo_fusao_nao_calculada }}</p>
+            </div>
+          </div>
+          {% elif pipeline.erro_fusao_multimodal %}
+          <p class="text-sm text-rose-600">Erro ao calcular a fusão: {{ pipeline.erro_fusao_multimodal }}</p>
+          {% endif %}
+        </section>
+        {% endif %}
+        <!-- Radar comparativo (span 4) -->
+        <section class="col-span-12 lg:col-span-4 premium-card bg-white rounded-2xl p-6 flex flex-col shadow-sm">
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Radar comparativo</h3>
+          <div id="chart-radar" class="h-72"></div>
+        </section>
+
+        <!-- Curva ROC (span 6) -->
+        <section class="col-span-12 md:col-span-6 premium-card bg-white rounded-2xl p-6 shadow-sm">
+          <h3 class="text-xl font-bold text-slate-900 mb-4">Curva ROC</h3>
+          {% if pipeline.classes and pipeline.classes|length > 2 %}
+          <div class="h-72 flex items-center justify-center">
+            <p class="text-sm text-slate-400 text-center px-6">
+              Curva ROC não se aplica a classificação multi-classe ({{ pipeline.classes|length }} classes) —
+              o AUC (média macro entre as classes) aparece na tabela de métricas.
+            </p>
+          </div>
+          {% else %}
+          <div id="chart-roc" class="h-72"></div>
+          {% endif %}
+        </section>
+
+        <!-- Matriz de confusão (span 3) -->
+        <section class="col-span-12 md:col-span-3 premium-card bg-white rounded-2xl p-6 flex flex-col shadow-sm">
+          <h3 class="text-xl font-bold text-slate-900 mb-6">Matriz de confusão</h3>
+          {% if cm and cm|length == 2 %}
+          <div class="flex-grow grid grid-cols-2 grid-rows-2 gap-2 aspect-square max-w-[220px] mx-auto w-full">
+            <div class="bg-teal-700 flex flex-col items-center justify-center rounded-lg text-white">
+              <span class="text-2xl font-bold">{{ cm[0][0] }}</span><span class="text-[10px] opacity-80 uppercase">VN</span>
+            </div>
+            <div class="bg-teal-50 border border-teal-200 flex flex-col items-center justify-center rounded-lg text-teal-700">
+              <span class="text-2xl font-bold">{{ cm[0][1] }}</span><span class="text-[10px] opacity-80 uppercase">FP</span>
+            </div>
+            <div class="bg-teal-100 flex flex-col items-center justify-center rounded-lg text-teal-700">
+              <span class="text-2xl font-bold">{{ cm[1][0] }}</span><span class="text-[10px] opacity-80 uppercase">FN</span>
+            </div>
+            <div class="bg-teal-600 flex flex-col items-center justify-center rounded-lg text-white">
+              <span class="text-2xl font-bold">{{ cm[1][1] }}</span><span class="text-[10px] opacity-80 uppercase">VP</span>
+            </div>
+          </div>
+          <div class="mt-6 space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-500">Acurácia:</span>
+              <span class="font-bold text-slate-800 font-mono">{{ '%.1f'|format((mv.acuracia|default(0, true)) * 100) }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-teal-600 h-full" style="width: {{ (mv.acuracia|default(0, true)) * 100 }}%"></div>
+            </div>
+          </div>
+          {% elif cm %}
+          {% set classes_cm = pipeline.classes or range(cm|length)|list %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-[11px] text-center border-collapse">
+              <thead>
+                <tr>
+                  <th class="p-1 text-slate-400 font-normal">real \ previsto</th>
+                  {% for c in classes_cm %}<th class="p-1 text-slate-500 font-semibold">{{ c }}</th>{% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for linha in cm %}
+                {% set idx_linha = loop.index0 %}
+                <tr>
+                  <td class="p-1 text-slate-500 font-semibold text-right">{{ classes_cm[idx_linha] }}</td>
+                  {% for valor in linha %}
+                  <td class="p-1.5 rounded {% if loop.index0 == idx_linha %}bg-teal-600 text-white font-bold{% else %}bg-slate-50 text-slate-600{% endif %}">{{ valor }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-500">Acurácia:</span>
+              <span class="font-bold text-slate-800 font-mono">{{ '%.1f'|format((mv.acuracia|default(0, true)) * 100) }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-teal-600 h-full" style="width: {{ (mv.acuracia|default(0, true)) * 100 }}%"></div>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-slate-400 text-sm text-center my-auto">Matriz indisponível.</p>
+          {% endif %}
+        </section>
+
+        <!-- Teste A/B McNemar (span 3) -->
+        <section class="col-span-12 md:col-span-3 premium-card bg-white rounded-2xl p-6 flex flex-col shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <h3 class="text-xl font-bold text-slate-900">Teste A/B</h3>
+            <span class="material-symbols-outlined text-teal-600 text-lg">science</span>
+          </div>
+          {% if pipeline.comparacao_ab and pipeline.comparacao_ab.p_valor is defined %}
+          <p class="text-xs text-slate-500 mb-4">Comparação estatística (McNemar) entre {{ pipeline.comparacao_ab.modelo_a }} e {{ pipeline.comparacao_ab.modelo_b }}.</p>
+          <div class="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-100">
+            <div class="flex justify-between mb-2">
+              <span class="text-[11px] uppercase text-slate-500 font-semibold">Chi-Square</span>
+              <span class="font-mono text-slate-800">{{ pipeline.comparacao_ab.chi2 }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[11px] uppercase text-slate-500 font-semibold">P-Value</span>
+              <span class="font-mono font-bold text-slate-800">{{ pipeline.comparacao_ab.p_valor }}{% if pipeline.comparacao_ab.diferenca_significativa %}*{% endif %}</span>
+            </div>
+          </div>
+          <div class="mt-auto p-3 rounded-lg flex items-center gap-3 border
+            {% if pipeline.comparacao_ab.diferenca_significativa %}border-teal-200 bg-teal-50{% else %}border-slate-200 bg-slate-50{% endif %}">
+            <span class="material-symbols-outlined {% if pipeline.comparacao_ab.diferenca_significativa %}text-teal-600{% else %}text-slate-400{% endif %}" style="font-variation-settings:'FILL' 1;">{% if pipeline.comparacao_ab.diferenca_significativa %}verified{% else %}info{% endif %}</span>
+            <div>
+              <div class="text-[11px] font-bold uppercase {% if pipeline.comparacao_ab.diferenca_significativa %}text-teal-700{% else %}text-slate-500{% endif %}">
+                {% if pipeline.comparacao_ab.diferenca_significativa %}Significativo{% else %}Não significativo{% endif %}
+              </div>
+              <div class="text-[10px] text-slate-500 leading-tight">
+                {% if pipeline.comparacao_ab.diferenca_significativa %}O vencedor difere estatisticamente (p &lt; 0.05).{% else %}Sem diferença estatística (p ≥ 0.05).{% endif %}
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-slate-400 text-sm my-auto text-center">Teste A/B indisponível (modelos empatados ou base pequena).</p>
+          {% endif %}
+        </section>
+      </div>
+
+      <!-- Métricas secundárias do vencedor (dados reais) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+        {% set v_mcc = mv.mcc if (mv.mcc is defined and mv.mcc is not none) else none %}
+        {% set v_kappa = mv.kappa if (mv.kappa is defined and mv.kappa is not none) else none %}
+        {% set v_ece = mv.ece if (mv.ece is defined and mv.ece is not none) else none %}
+        <div class="premium-card bg-white p-5 rounded-2xl shadow-sm">
+          <div class="text-[11px] text-slate-500 uppercase font-semibold mb-1">MCC (Matthews)</div>
+          <div class="text-2xl font-bold text-slate-900 font-mono">{{ fmt3(v_mcc) }}</div>
+          <div class="text-xs {% if v_mcc is not none and v_mcc >= 0.5 %}text-teal-600{% else %}text-slate-400{% endif %} font-semibold">{% if v_mcc is none %}sem dado{% elif v_mcc >= 0.7 %}Forte{% elif v_mcc >= 0.4 %}Moderado{% else %}Fraco{% endif %}</div>
+        </div>
+        <div class="premium-card bg-white p-5 rounded-2xl shadow-sm">
+          <div class="text-[11px] text-slate-500 uppercase font-semibold mb-1">Kappa (Cohen)</div>
+          <div class="text-2xl font-bold text-slate-900 font-mono">{{ fmt3(v_kappa) }}</div>
+          <div class="text-xs {% if v_kappa is not none and v_kappa >= 0.6 %}text-teal-600{% else %}text-slate-400{% endif %} font-semibold">{% if v_kappa is none %}sem dado{% else %}Concordância{% endif %}</div>
+        </div>
+        <div class="premium-card bg-white p-5 rounded-2xl shadow-sm">
+          <div class="text-[11px] text-slate-500 uppercase font-semibold mb-1">ECE (Calibração)</div>
+          <div class="text-2xl font-bold text-slate-900 font-mono">{{ fmt3(v_ece) }}</div>
+          <div class="text-xs {% if v_ece is not none and v_ece <= 0.1 %}text-teal-600{% else %}text-amber-600{% endif %} font-semibold">{% if v_ece is none %}sem dado{% elif v_ece <= 0.1 %}Bem calibrado{% else %}Reavaliar{% endif %}</div>
+        </div>
+        <div class="premium-card bg-white p-5 rounded-2xl shadow-sm">
+          <div class="text-[11px] text-slate-500 uppercase font-semibold mb-1">Latência</div>
+          <div class="text-2xl font-bold text-slate-900 font-mono">{{ mv.latencia_inferencia_ms|default('—', true) }}<span class="text-sm text-slate-400"> ms</span></div>
+          <div class="text-xs text-slate-400">Treino: {{ mv.tempo_treino_s|default('—', true) }}s · 5-fold CV</div>
+        </div>
+      </div>
+
+      {% else %}
+      <div class="premium-card bg-white rounded-2xl p-8 text-center shadow-sm">
+        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">bar_chart</span>
+        <p class="text-slate-400 text-sm">
+          {% if pipeline.modo in ('multimodal', 'multimodal_expandido') and pipeline.metricas_tabular %}
+          AutoML de imagem não executado — as imagens desta base não têm rótulo próprio (ex.: pastas organizadas
+          por tipo de exame, não por diagnóstico). O resultado da parte tabular aparece abaixo.
+          {% else %}
+          AutoML não executado — dados insuficientes (menos de 10 amostras ou apenas 1 classe).
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+
+      <!-- ===== AutoML — Dados Tabulares (multimodal) ===== -->
+      {% if pipeline.metricas_tabular and pipeline.melhor_modelo_tabular %}
+      {% set melhor_t = pipeline.melhor_modelo_tabular %}
+      {% set mvt = pipeline.metricas_tabular[melhor_t] %}
+      {% set cmt = (pipeline.cm_tabular or {}).get(melhor_t) %}
+      {% set ranking_t = pipeline.metricas_tabular.items()|sort(attribute='1.score_clinico', reverse=true) %}
+      {% set medalhas_t = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣'] %}
+
+      <div class="grid grid-cols-12 gap-5">
+        <section class="col-span-12 lg:col-span-8 premium-card bg-white rounded-2xl overflow-hidden flex flex-col shadow-sm">
+          <div class="p-6 border-b border-slate-100">
+            <div class="flex justify-between items-center mb-5">
+              <h2 class="text-xl font-bold text-slate-900">AutoML — Dados Tabulares</h2>
+              <span class="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-semibold">
+                {{ pipeline.metricas_tabular|length }} Classificadores{% if mvt.n_classes and mvt.n_classes > 2 %} · {{ mvt.n_classes }} classes{% endif %}
+              </span>
+            </div>
+
+            {% set piso_ok_t = pipeline.piso_sensibilidade_atingido_tabular if pipeline.piso_sensibilidade_atingido_tabular is defined else true %}
+            {% set piso_ok_t = pipeline.piso_sensibilidade_atingido_tabular if pipeline.piso_sensibilidade_atingido_tabular is defined else true %}
+            <div class="flex flex-wrap items-center gap-4 {% if piso_ok_t %}bg-teal-50/60 border-teal-100{% else %}bg-amber-50 border-amber-200{% endif %} border rounded-xl p-4">
+              <span class="text-3xl">{% if piso_ok_t %}🏆{% else %}⚠️{% endif %}</span>
+              <div class="flex-1 min-w-[180px]">
+                <p class="text-[10px] {% if piso_ok_t %}text-teal-700{% else %}text-amber-700{% endif %} uppercase font-bold tracking-wide">
+                  {% if piso_ok_t %}Vencedor — Score Clínico Multiobjetivo{% else %}Nenhum modelo atingiu o piso clínico de segurança{% endif %}
+                </p>
+                <p class="text-2xl font-extrabold text-slate-900">{{ melhor_t }}</p>
+                <p class="text-[11px] {% if piso_ok_t %}text-slate-500{% else %}text-amber-800{% endif %} mt-0.5">Coluna-alvo: {{ pipeline.schema_tabular.label_name if pipeline.schema_tabular else '—' }}</p>
+                {% if not piso_ok_t %}
+                <p class="text-[11px] text-amber-800 mt-2 bg-amber-100 border border-amber-200 rounded-lg px-3 py-2">
+                  ⚠️ {{ pipeline.aviso_piso_sensibilidade_tabular or 'Nenhum dos ' ~ pipeline.metricas_tabular|length ~ ' modelos atingiu a sensibilidade mínima exigida — o desempenho ficou próximo do acaso. Veja o ranking abaixo antes de confiar neste resultado.' }}
+                </p>
+                {% endif %}
+              </div>
+              <div class="flex gap-2 shrink-0">
+                <div class="bg-white rounded-lg px-3 py-2 text-center border border-slate-100">
+                  <p class="text-[9px] text-slate-400 uppercase font-bold">Acurácia</p>
+                  <p class="font-mono font-extrabold text-sm text-slate-800">{{ '%.1f'|format((mvt.acuracia|default(0, true)) * 100) }}%</p>
+                </div>
+                <div class="bg-white rounded-lg px-3 py-2 text-center border border-slate-100">
+                  <p class="text-[9px] text-slate-400 uppercase font-bold">F1-Score</p>
+                  <p class="font-mono font-extrabold text-sm text-slate-800">{{ '%.1f'|format((mvt.f1|default(0, true)) * 100) }}%</p>
+                </div>
+                <div class="bg-white rounded-lg px-3 py-2 text-center border border-slate-100">
+                  <p class="text-[9px] text-slate-400 uppercase font-bold">AUC-ROC</p>
+                  <p class="font-mono font-extrabold text-sm text-slate-800">{{ '%.1f'|format((mvt.auc|default(0, true)) * 100) }}%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6 space-y-3">
+            <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wide mb-1">Ranking completo dos {{ pipeline.metricas_tabular|length }} modelos</p>
+            {% for nome, m in ranking_t %}
+            {% set isWinnerT = (nome == melhor_t) %}
+            <div class="border {% if isWinnerT %}border-teal-300 bg-teal-50/30{% else %}border-slate-100 bg-white{% endif %} rounded-xl p-4 flex flex-wrap items-center gap-4">
+              <span class="text-xl w-6 text-center">{{ medalhas_t[loop.index0] if loop.index0 < 6 else (loop.index ~ 'º') }}</span>
+              <div class="flex-1 min-w-[140px]">
+                <p class="font-bold text-sm text-slate-800">{{ nome }}</p>
+                <p class="text-[11px] text-slate-400">score clínico: {{ '%.3f'|format(m.score_clinico|default(0, true)) }}</p>
+              </div>
+              <div class="flex gap-4 text-right">
+                <div><p class="text-[9px] text-slate-400 uppercase">Acurácia</p><p class="font-mono text-sm font-semibold">{{ '%.1f'|format((m.acuracia|default(0, true))*100) }}%</p></div>
+                <div><p class="text-[9px] text-slate-400 uppercase">AUC</p><p class="font-mono text-sm font-semibold">{{ '%.1f'|format((m.auc|default(0, true))*100) }}%</p></div>
+                <div><p class="text-[9px] text-slate-400 uppercase">F1</p><p class="font-mono text-sm font-semibold">{{ '%.1f'|format((m.f1|default(0, true))*100) }}%</p></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- Matriz de confusão tabular (span 4) -->
+        <section class="col-span-12 lg:col-span-4 premium-card bg-white rounded-2xl p-6 flex flex-col shadow-sm">
+          <h3 class="text-xl font-bold text-slate-900 mb-6">Matriz de confusão (tabular)</h3>
+          {% if cmt and cmt|length == 2 %}
+          <div class="flex-grow grid grid-cols-2 grid-rows-2 gap-2 aspect-square max-w-[220px] mx-auto w-full">
+            <div class="bg-teal-700 flex flex-col items-center justify-center rounded-lg text-white">
+              <span class="text-2xl font-bold">{{ cmt[0][0] }}</span><span class="text-[10px] opacity-80 uppercase">VN</span>
+            </div>
+            <div class="bg-teal-50 border border-teal-200 flex flex-col items-center justify-center rounded-lg text-teal-700">
+              <span class="text-2xl font-bold">{{ cmt[0][1] }}</span><span class="text-[10px] opacity-80 uppercase">FP</span>
+            </div>
+            <div class="bg-teal-100 flex flex-col items-center justify-center rounded-lg text-teal-700">
+              <span class="text-2xl font-bold">{{ cmt[1][0] }}</span><span class="text-[10px] opacity-80 uppercase">FN</span>
+            </div>
+            <div class="bg-teal-600 flex flex-col items-center justify-center rounded-lg text-white">
+              <span class="text-2xl font-bold">{{ cmt[1][1] }}</span><span class="text-[10px] opacity-80 uppercase">VP</span>
+            </div>
+          </div>
+          {% elif cmt %}
+          {% set classes_cmt = mvt.classes or range(cmt|length)|list %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-[11px] text-center border-collapse">
+              <thead>
+                <tr>
+                  <th class="p-1 text-slate-400 font-normal">real \ previsto</th>
+                  {% for c in classes_cmt %}<th class="p-1 text-slate-500 font-semibold">{{ c }}</th>{% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for linha in cmt %}
+                {% set idx_linha_t = loop.index0 %}
+                <tr>
+                  <td class="p-1 text-slate-500 font-semibold text-right">{{ classes_cmt[idx_linha_t] }}</td>
+                  {% for valor in linha %}
+                  <td class="p-1.5 rounded {% if loop.index0 == idx_linha_t %}bg-teal-600 text-white font-bold{% else %}bg-slate-50 text-slate-600{% endif %}">{{ valor }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-2 text-center">{{ cmt|length }} classes — diagonal destacada = acertos</p>
+          {% else %}
+          <p class="text-slate-400 text-sm text-center my-auto">Matriz indisponível.</p>
+          {% endif %}
+        </section>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 4: LAUDO INTERATIVO                  -->
+    <!-- ========================================== -->
+    <div id="tab-interativo" class="tab-pane hidden space-y-8">
+
+      <!-- Linha 1: Dossiê (esq) + Laudo Populacional (dir) — layout Stitch -->
+      <div class="grid grid-cols-12 gap-5">
+
+        <!-- Dossiê do Radiologista IA (span 8) -->
+        <section class="col-span-12 lg:col-span-8 laudo-card premium-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+          <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-teal-600 text-2xl">description</span>
+              <h3 class="text-xl font-bold text-slate-900">{% if pipeline.modo == 'tabular' %}Relatório da Análise Tabular{% else %}Dossiê do Radiologista IA{% endif %}</h3>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="px-3 py-1 rounded-full text-xs font-bold uppercase
+                {% if dados.categoria == 'MALIGNO' %}bg-rose-100 text-rose-700
+                {% elif dados.categoria == 'BENIGNO' %}bg-emerald-100 text-emerald-700
+                {% else %}bg-slate-100 text-slate-600{% endif %}">{{ dados.categoria }}</span>
+              <button onclick="window.print()"
+                class="no-print flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-2 rounded-lg transition-all border border-slate-200">
+                <span class="material-symbols-outlined text-base">print</span> Imprimir
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="border border-slate-200 rounded-xl p-6 bg-slate-50/40">
+              <div class="laudo-body">{{ laudo_html | safe }}</div>
+            </div>
+            <div class="aviso-etico">
+              <span class="aviso-etico-icon">🛡️</span>
+              <div class="aviso-etico-texto">
+                <span class="aviso-etico-titulo">Aviso Ético Obrigatório</span>
+                Este relatório é gerado por IA para suporte à decisão clínica e não substitui a avaliação presencial de um profissional de saúde qualificado. Não utilize este laudo como único critério diagnóstico.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Laudo Populacional (span 4) -->
+        <section class="col-span-12 lg:col-span-4 premium-card bg-white rounded-2xl shadow-sm p-6 flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xl font-bold text-slate-900">Laudo Populacional</h3>
+            <button id="btn-gerar-laudo-populacional" onclick="carregarLaudoPopulacional()"
+              class="flex items-center gap-1.5 bg-teal-600 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-teal-700 active:scale-[0.98] transition-all">
+              <span id="spinner-populacional" class="hidden w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+              <span class="material-symbols-outlined text-base">groups</span> Gerar
+            </button>
+          </div>
+          <p class="text-xs text-slate-400 mb-4">Relatório determinístico de toda a base: distribuição de classes, correlações de biomarcadores e pódio do AutoML. Não depende do LLM.</p>
+          <div id="painel-laudo-populacional" class="hidden flex-grow">
+            <div id="conteudo-laudo-populacional" class="laudo-body"></div>
+            <div class="aviso-etico">
+              <span class="aviso-etico-icon">🛡️</span>
+              <div class="aviso-etico-texto">
+                <span class="aviso-etico-titulo">Aviso Ético Obrigatório</span>
+                Relatório estatístico de suporte — NÃO substitui avaliação médica habilitada.
+              </div>
+            </div>
+          </div>
+          <div id="populacional-placeholder" class="flex-grow flex flex-col items-center justify-center text-center text-slate-300 py-10">
+            <span class="material-symbols-outlined text-5xl mb-2">bar_chart</span>
+            <p class="text-xs text-slate-400 max-w-[200px]">Clique em <b class="text-teal-600">Gerar</b> para produzir o laudo populacional da base.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== SEÇÃO A: Laudo de Amostra (nova) ===== -->
+      <div class="premium-card bg-white rounded-2xl shadow-sm overflow-hidden">
+        <!-- Header da seção -->
+        <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4 flex items-center gap-3">
+          <span class="text-white text-lg">🩺</span>
+          <div>
+            <h3 class="text-sm font-bold text-white">Seção A — Laudo de Amostra</h3>
+            <p class="text-teal-100 text-xs mt-0.5">Faça upload de uma amostra avulsa ou selecione uma análise anterior para gerar um laudo do Radiologista IA.</p>
+          </div>
+        </div>
+        <div class="p-6 space-y-5">
+
+          <!-- Toggle: Upload vs Banco -->
+          <div class="flex items-center gap-2 border border-slate-200 rounded-xl p-1 w-fit">
+            <button id="btn-modo-upload"
+              onclick="setModoAmostra('upload')"
+              class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-teal-600 text-white shadow">
+              Enviar arquivo avulso
+            </button>
+            <button id="btn-modo-banco"
+              onclick="setModoAmostra('banco')"
+              class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-700">
+              Selecionar de análise anterior
+            </button>
+          </div>
+
+          <!-- Painel de Upload -->
+          <div id="painel-upload" class="space-y-4">
+            <label
+              class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30 hover:bg-teal-50/60 cursor-pointer transition-all group"
+              for="input-amostra-file">
+              <span class="text-3xl mb-2">⬆️</span>
+              <span class="text-sm font-semibold text-teal-700 group-hover:text-teal-900">Clique ou arraste um arquivo</span>
+              <span class="text-xs text-slate-400 mt-1">PNG, JPG, DICOM (.dcm), CSV, EDF, WAV, MP4…</span>
+              <input type="file" id="input-amostra-file" class="sr-only" onchange="onArquivoSelecionado(this)">
+            </label>
+            <div id="preview-arquivo" class="hidden bg-slate-50 rounded-xl px-4 py-3 text-xs text-slate-600 flex items-center gap-2 border border-slate-100">
+              <span class="text-lg">📄</span>
+              <span id="nome-arquivo-preview" class="font-mono font-bold truncate flex-1">—</span>
+              <button onclick="limparArquivo()" class="text-slate-400 hover:text-slate-700 underline shrink-0">Remover</button>
+            </div>
+          </div>
+
+          <!-- Painel de Exemplos do Dataset Atual -->
+          <div id="painel-banco" class="hidden space-y-3">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-slate-500 font-semibold">Exemplos do Dataset Atual</p>
+              <button onclick="carregarExemplosDataset()" class="text-xs text-teal-600 hover:underline font-semibold">🔄 Atualizar</button>
+            </div>
+            <div id="tabela-banco" class="overflow-x-auto max-h-60 overflow-y-auto border border-slate-100 rounded-xl">
+              <table class="w-full text-xs">
+                <thead class="sticky top-0 bg-slate-50">
+                  <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 text-left">
+                    <th class="px-3 py-2 font-semibold w-6"></th>
+                    <th class="px-3 py-2 font-semibold">#</th>
+                    <th class="px-3 py-2 font-semibold">Nome</th>
+                    <th class="px-3 py-2 font-semibold">Categoria</th>
+                    <th class="px-3 py-2 font-semibold">Família</th>
+                    <th class="px-3 py-2 font-semibold">Biomarcadores (resumo)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-banco">
+                  <tr><td colspan="6" class="py-6 text-center text-slate-400">Carregando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p id="banco-selecao-info" class="text-xs text-teal-700 font-semibold hidden">✓ Exemplo selecionado: <span id="banco-selecao-label"></span></p>
+          </div>
+
+          <!-- Botão de geração -->
+          <button id="btn-gerar-laudo-amostra"
+            onclick="gerarLaudoAmostra()"
+            class="w-full bg-teal-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-teal-700 active:scale-[0.98] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+            disabled>
+            <span id="spinner-amostra" class="hidden w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+            🧠 Gerar Laudo do Radiologista IA
+          </button>
+        </div>
+      </div>
+
+      <!-- Painel de resposta do laudo de amostra -->
+      <div id="painel-laudo-amostra" class="hidden laudo-card premium-card bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-teal-600 to-teal-800 px-7 py-5">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-white/15 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🩺</div>
+            <div>
+              <h3 class="text-white font-extrabold text-base leading-tight">Laudo de Amostra — Radiologista IA</h3>
+              <p class="text-teal-200 text-xs mt-0.5 font-mono" id="label-fonte-laudo-amostra">—</p>
+            </div>
+          </div>
+        </div>
+        <div class="px-7 pt-6 pb-2">
+          <div id="badge-inferencia-amostra" class="hidden mb-4"></div>
+          <div id="conteudo-laudo-amostra" class="laudo-body"></div>
+          <div class="aviso-etico">
+            <span class="aviso-etico-icon">🛡️</span>
+            <div class="aviso-etico-texto">
+              <span class="aviso-etico-titulo">Aviso Ético Obrigatório</span>
+              Laudo de suporte gerado por IA — NÃO substitui avaliação médica habilitada. Consulte sempre um profissional de saúde qualificado.
+            </div>
+          </div>
+        </div>
+        <div class="h-4"></div>
+      </div>
+
+    </div>
+    <!-- /tab-interativo -->
+
+  </main>
+
+  <!-- Plotly charts & dynamic scripts -->
+  <script>
+    const pipeline = {{ pipeline_json | safe }};
+    const metricas = pipeline.metricas || {};
+    const rocData = pipeline.roc_data || {};
+    const cmData = pipeline.confusion_matrix || {};
+    const metricasCV = pipeline.metricas_cv || {};
+    const comparacaoAB = pipeline.comparacao_ab || {};
+    const stats = pipeline.estatisticas || {};
+    const melhor = pipeline.melhor_modelo || '';
+
+    // ── Prévia do sinal (F1/F3/F4): plota dados_viz downsampled ────────────────
+    function renderSinalPreview() {
+      const el = document.getElementById('chart-sinal-preview');
+      const dv = pipeline.dados_viz;
+      if (!el || !dv || !dv.length) return;
+      const canais = pipeline.canais || [];
+      const ehMulti = Array.isArray(dv[0]);
+      const series = ehMulti ? dv.slice(0, 6) : [dv];
+      const traces = series.map((serie, i) => ({
+        type: 'scatter', mode: 'lines',
+        y: serie,
+        name: canais[i] || (ehMulti ? `Canal ${i + 1}` : (pipeline.tipo_sinal || 'Sinal')),
+        line: { width: 1 },
+      }));
+      Plotly.newPlot('chart-sinal-preview', traces, {
+        ...layout_base,
+        margin: { t: 10, b: 30, l: 40, r: 10 },
+        xaxis: { title: 'Amostra (downsampled)', zeroline: false },
+        yaxis: { title: 'Amplitude', zeroline: false },
+        legend: { orientation: 'h', y: -0.25 },
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    // ── Engenharia de Features (gráfico de importância + cards na aba Pré-proc) ─
+    function renderFeaturesEngenharia() {
+      const fe = pipeline.features_engenharia || {};
+      const ranking = fe.ranking || [];
+
+      const secao = document.getElementById('secao-features-engenharia');
+      if (!secao) return;
+      const vazio = document.getElementById('fe-vazio');
+      const conteudo = document.getElementById('fe-conteudo');
+
+      if (!ranking.length) {
+        if (vazio) vazio.classList.remove('hidden');
+        if (conteudo) conteudo.classList.add('hidden');
+        return;
+      }
+      if (vazio) vazio.classList.add('hidden');
+      if (conteudo) conteudo.classList.remove('hidden');
+
+      document.getElementById('fe-metodo').textContent = fe.metodo || '—';
+      document.getElementById('fe-amostras').textContent =
+        fe.n_amostras ? `· ${fe.n_amostras} amostra(s)` : '';
+
+      // Gráfico de barras horizontais das top features por importância.
+      const top = ranking.slice(0, 10).reverse();
+      const nomes = top.map(d => d.nome);
+      const scores = top.map(d => d.score);
+      const maxScore = Math.max(...scores, 1e-9);
+      const coresBar = scores.map(s => {
+        const r = s / maxScore;
+        return r >= 0.66 ? '#0d9488' : (r >= 0.33 ? '#14b8a6' : '#5eead4');
+      });
+      const hover = top.map(d =>
+        d.p_valor !== null && d.p_valor !== undefined
+          ? `${d.nome}<br>score: ${d.score}<br>p-valor: ${d.p_valor}`
+          : `${d.nome}<br>score: ${d.score}`);
+
+      Plotly.newPlot('chart-features-imp', [{
+        type: 'bar', orientation: 'h',
+        x: scores, y: nomes,
+        marker: { color: coresBar },
+        text: scores.map(s => s.toFixed(2)), textposition: 'outside',
+        hoverinfo: 'text', hovertext: hover,
+      }], {
+        ...layout_base,
+        margin: { t: 10, b: 40, l: 120, r: 30 },
+        xaxis: { title: 'Importância (score)', zeroline: false },
+        yaxis: { automargin: true },
+      }, { displayModeBar: false, responsive: true });
+
+      // Cards com os valores médios da amostra.
+      const grid = document.getElementById('grid-features-engenharia');
+      const medias = fe.medias || {};
+      const chaves = Object.keys(medias);
+      const maxAbs = Math.max(...chaves.map(k => Math.abs(medias[k])), 1e-9);
+      grid.innerHTML = chaves.map((k, i) => {
+        const v = medias[k];
+        const ratio = Math.abs(v) / maxAbs;
+        const cor = ratio >= 0.66 ? '#0d9488' : (ratio >= 0.33 ? '#d97706' : '#94a3b8');
+        return `<div class="rounded-xl p-3 border border-slate-100 opacity-0 transition-all duration-500"
+                     style="background:rgba(13,148,136,0.04);transition-delay:${i * 20}ms">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold truncate" title="${k}">${k}</div>
+          <div class="mt-1 font-mono font-bold text-base" style="color:${cor}">${Number(v).toFixed(4)}</div>
+        </div>`;
+      }).join('');
+
+      secao.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        grid.querySelectorAll('div[style]').forEach(el => { el.style.opacity = '1'; });
+      });
+    }
+
+    const layout_base = {
+      margin: { t: 20, b: 50, l: 50, r: 20 },
+      paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+      font: { family: 'Outfit, ui-sans-serif, system-ui, sans-serif', size: 11, color: '#64748b' },
+    };
+
+    // Paleta de cores para 6 modelos do AutoML
+    const cores = {
+      LogisticRegression: '#14b8a6',
+      KNN: '#6366f1',
+      SVM: '#f59e0b',
+      RandomForest: '#10b981',
+      GradientBoosting: '#8b5cf6',
+      MLP: '#ec4899'
+    };
+    const coresCat = { BENIGNO: '#10b981', MALIGNO: '#f43f5e', INDEFINIDO: '#94a3b8' };
+
+    // ── Aba 1: Biomarcadores por Amostra (tabela dinâmica, layout Stitch) ──────
+    function renderBiomarcadoresPorAmostra() {
+      const head = document.getElementById('head-bio-amostra');
+      const body = document.getElementById('tbody-bio-amostra');
+      const vazio = document.getElementById('bio-amostra-vazio');
+      if (!head || !body) return;
+      const lista = pipeline.biomarcadores_sinal || pipeline.biomarcadores || [];
+      if (!lista.length) { if (vazio) vazio.classList.remove('hidden'); return; }
+
+      const achatar = (bio) => {
+        const out = {};
+        for (const k in (bio || {})) {
+          const v = bio[k];
+          if (v && typeof v === 'object' && !Array.isArray(v)) {
+            for (const kk in v) { if (typeof v[kk] === 'number') out[kk] = v[kk]; }
+          } else if (typeof v === 'number') { out[k] = v; }
+        }
+        return out;
+      };
+
+      const colunas = Object.keys(achatar(lista[0].biomarcadores)).slice(0, 6);
+      head.innerHTML = `<th class="px-4 py-3 font-semibold">Amostra</th>`
+        + colunas.map(c => `<th class="px-4 py-3 font-semibold capitalize">${c}</th>`).join('')
+        + `<th class="px-4 py-3 font-semibold">Status</th>`;
+
+      body.innerHTML = lista.slice(0, 50).map(item => {
+        const flat = achatar(item.biomarcadores);
+        const nome = (item.caminho || '').split(/[\\/]/).pop() || '—';
+        const cat = (item.categoria || 'INDEFINIDO').toUpperCase();
+        const badge = cat.includes('MALIG') ? 'bg-rose-100 text-rose-700'
+          : (cat.includes('BENIG') || cat.includes('NORMAL')) ? 'bg-emerald-100 text-emerald-700'
+          : 'bg-slate-100 text-slate-600';
+        const cells = colunas.map(c => `<td class="px-4 py-3 font-mono text-slate-600">${flat[c] !== undefined ? (+flat[c]).toFixed(3) : '—'}</td>`).join('');
+        return `<tr class="hover:bg-slate-50/60 transition-colors">
+          <td class="px-4 py-3 font-semibold text-slate-800 truncate max-w-[180px]" title="${nome}">${nome}</td>
+          ${cells}
+          <td class="px-4 py-3"><span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${badge}">${cat}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    renderFeaturesEngenharia();
+    renderSinalPreview();
+    renderBiomarcadoresPorAmostra();
+
+    // --- Navegação em Abas (Tabs) ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      });
+
+      const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+      activeBtn.classList.remove('border-transparent', 'text-slate-500');
+      activeBtn.classList.add('tab-active');
+
+      // Responsive Plotly size recalculation
+      window.dispatchEvent(new Event('resize'));
+    }
+
+    // --- Accordion de Features (Sidebar) ---
+    function selectFeature(index) {
+      document.querySelectorAll('.feature-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.feature-btn').forEach(b => {
+        b.classList.remove('bg-teal-50', 'border-teal-300', 'text-teal-900');
+        b.classList.add('border-slate-100', 'text-slate-700');
+      });
+
+      const activePanel = document.getElementById(`feat-panel-${index}`);
+      if (activePanel) {
+        activePanel.classList.remove('hidden');
+        const activeBtn = document.getElementById(`btn-feat-${index}`);
+        activeBtn.classList.remove('border-slate-100', 'text-slate-700');
+        activeBtn.classList.add('bg-teal-50', 'border-teal-300', 'text-teal-900');
+      }
+    }
+
+    // Auto-seleciona a primeira feature tabular por padrão se existir
+    selectFeature('0');
+
+    // --- Boxplot de Biomarcadores (Image Mode) ---
+    if (document.getElementById('chart-boxplot')) {
+      const tracesBox = [];
+      const categorias = Object.keys(stats);
+      const campos = ['solidez', 'circularidade', 'entropia', 'homogeneidade', 'contraste'];
+      for (const cat of categorias) {
+        const valoresJunto = [];
+        const labelsJunto = [];
+        for (const campo of campos) {
+          const v = stats[cat]?.campos?.[campo]?.valores;
+          if (v && v.length) {
+            valoresJunto.push(...v);
+            labelsJunto.push(...Array(v.length).fill(campo));
+          }
+        }
+        if (valoresJunto.length) {
+          tracesBox.push({
+            name: cat.charAt(0) + cat.slice(1).toLowerCase(),
+            type: 'box',
+            y: valoresJunto,
+            x: labelsJunto,
+            marker: { color: coresCat[cat] || '#94a3b8' },
+            boxpoints: 'outliers',
+          });
+        }
+      }
+      Plotly.newPlot('chart-boxplot', tracesBox, {
+        ...layout_base,
+        boxmode: 'group',
+        xaxis: { title: 'Biomarcador' },
+        yaxis: { title: 'Valor Mapeado' },
+        legend: { orientation: 'h', y: -0.2 },
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    // --- AutoML: Comparativo de Acurácia ---
+    if (document.getElementById('chart-comparacao') && Object.keys(metricas).length) {
+      const keys = ['acuracia', 'precisao', 'recall', 'f1', 'auc'];
+      const labels = ['Acurácia', 'Precisão', 'Recall', 'F1', 'AUC'];
+      const tracesComp = Object.entries(metricas).map(([nome, vals]) => ({
+        name: nome,
+        type: 'bar',
+        x: labels,
+        y: keys.map(k => vals[k]),
+        marker: { color: cores[nome] || '#94a3b8' },
+        text: keys.map(k => (vals[k] * 100).toFixed(1) + '%'),
+        textposition: 'outside',
+      }));
+      Plotly.newPlot('chart-comparacao', tracesComp, {
+        ...layout_base,
+        barmode: 'group',
+        yaxis: { range: [0, 1.1], tickformat: '.0%' },
+        legend: { orientation: 'h', y: -0.2 },
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    // --- AutoML: Curva ROC ---
+    if (document.getElementById('chart-roc') && Object.keys(rocData).length) {
+      const tracesRoc = Object.entries(rocData).map(([nome, d]) => ({
+        name: `${nome} (AUC=${metricas[nome]?.auc ?? '?'})`,
+        type: 'scatter', mode: 'lines',
+        x: d.fpr, y: d.tpr,
+        line: { color: cores[nome] || '#94a3b8', width: 2 },
+      }));
+      tracesRoc.push({
+        name: 'Modelo Aleatório', type: 'scatter', mode: 'lines',
+        x: [0, 1], y: [0, 1],
+        line: { dash: 'dot', color: '#cbd5e1', width: 1.5 },
+      });
+      Plotly.newPlot('chart-roc', tracesRoc, {
+        ...layout_base,
+        xaxis: { title: 'Falsos Positivos (1 - Especificidade)', range: [0, 1] },
+        yaxis: { title: 'Verdadeiros Positivos (Sensibilidade)', range: [0, 1] },
+        legend: { orientation: 'h', y: -0.25 },
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    // --- AutoML: Matriz de Confusão ---
+    if (document.getElementById('chart-cm') && cmData[melhor]) {
+      const cm = cmData[melhor];
+      Plotly.newPlot('chart-cm', [{
+        type: 'heatmap',
+        z: cm,
+        x: ['Predito: Benigno', 'Predito: Maligno'],
+        y: ['Real: Benigno', 'Real: Maligno'],
+        colorscale: [[0, '#f0fdfa'], [1, '#0d9488']],
+        showscale: false,
+      }], {
+        ...layout_base,
+        margin: { t: 10, b: 30, l: 100, r: 10 },
+        annotations: cm.flatMap((row, i) => row.map((val, j) => ({
+          x: j, y: i, text: String(val), showarrow: false,
+          font: { size: 24, color: val > Math.max(...cm.flat()) / 2 ? '#fff' : '#0f172a', weight: 'bold' },
+        }))),
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    // --- AutoML: Gráfico Radar (Scatterpolar) ---
+    if (document.getElementById('chart-radar') && Object.keys(metricas).length) {
+      const radarDims = ['auc', 'sensibilidade', 'especificidade', 'f1', 'precisao'];
+      const radarLabels = ['AUC-ROC', 'Sensibilidade', 'Especificidade', 'F1-Score', 'Precisão'];
+      const tracesRadar = Object.entries(metricas).map(([nome, m]) => ({
+        type: 'scatterpolar',
+        name: nome,
+        r: [...radarDims.map(k => (m[k] ?? 0) * 100), (m[radarDims[0]] ?? 0) * 100],
+        theta: [...radarLabels, radarLabels[0]],
+        fill: 'toself',
+        fillcolor: (cores[nome] || '#94a3b8') + '22',
+        line: { color: cores[nome] || '#94a3b8', width: nome === melhor ? 2.5 : 1.2 },
+        opacity: nome === melhor ? 1 : 0.6,
+      }));
+      Plotly.newPlot('chart-radar', tracesRadar, {
+        ...layout_base,
+        polar: {
+          radialaxis: { visible: true, range: [0, 100], ticksuffix: '%', tickfont: { size: 9 } },
+          angularaxis: { tickfont: { size: 10 } },
+        },
+        legend: { orientation: 'h', y: -0.15, font: { size: 10 } },
+        margin: { t: 20, b: 60, l: 30, r: 30 },
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    // ── Aba 4: Laudo Interativo ───────────────────────────────────────────────
+    const RESULTADO_ID = {{ dados.id }};
+    const FAMILIA = '{{ pipeline.familia or "" }}';
+    const TIPO_SINAL = '{{ pipeline.tipo_sinal or dados.categoria or "" }}';
+
+    // ── Seção B: Laudo Populacional (determinístico, sem LLM) ──────────────────
+    async function carregarLaudoPopulacional() {
+      const btn = document.getElementById('btn-gerar-laudo-populacional');
+      const spinner = document.getElementById('spinner-populacional');
+      const painel = document.getElementById('painel-laudo-populacional');
+      const conteudo = document.getElementById('conteudo-laudo-populacional');
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      try {
+        const resp = await fetch('/laudo_populacional/' + RESULTADO_ID);
+        const data = await resp.json();
+        if (!resp.ok || data.erro) {
+          conteudo.innerHTML = `<p class="text-rose-600 text-sm">Erro ao gerar laudo populacional: ${data.erro || resp.status}</p>`;
+        } else {
+          conteudo.innerHTML = data.laudo_html || '<p class="text-slate-400 text-sm">Sem conteúdo.</p>';
+        }
+        painel.classList.remove('hidden');
+        document.getElementById('populacional-placeholder')?.classList.add('hidden');
+      } catch (e) {
+        conteudo.innerHTML = `<p class="text-rose-600 text-sm">Falha na requisição: ${e.message}</p>`;
+        painel.classList.remove('hidden');
+        document.getElementById('populacional-placeholder')?.classList.add('hidden');
+      } finally {
+        spinner.classList.add('hidden');
+        btn.disabled = false;
+      }
+    }
+
+    // ── Seção A: Toggle Upload / Exemplos do dataset ──────────────────────────
+    let modoAmostra = 'upload';
+    let exemploSelecionadoIdx = null;
+    let exemploSelecionadoNome = '';
+    let arquivoSelecionado = null;
+
+    function setModoAmostra(modo) {
+      modoAmostra = modo;
+      const isUpload = modo === 'upload';
+      document.getElementById('painel-upload').classList.toggle('hidden', !isUpload);
+      document.getElementById('painel-banco').classList.toggle('hidden', isUpload);
+      document.getElementById('btn-modo-upload').className = isUpload
+        ? 'px-4 py-2 rounded-lg text-xs font-bold transition-all bg-teal-600 text-white shadow'
+        : 'px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-700';
+      document.getElementById('btn-modo-banco').className = !isUpload
+        ? 'px-4 py-2 rounded-lg text-xs font-bold transition-all bg-teal-600 text-white shadow'
+        : 'px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-700';
+      if (!isUpload && document.getElementById('tbody-banco').children.length <= 1) {
+        carregarExemplosDataset();
+      }
+      atualizarBotaoGerar();
+    }
+
+    function onArquivoSelecionado(input) {
+      arquivoSelecionado = input.files[0] || null;
+      const preview = document.getElementById('preview-arquivo');
+      const nome = document.getElementById('nome-arquivo-preview');
+      if (arquivoSelecionado) {
+        nome.textContent = arquivoSelecionado.name;
+        preview.classList.remove('hidden');
+      } else {
+        preview.classList.add('hidden');
+      }
+      atualizarBotaoGerar();
+    }
+
+    function limparArquivo() {
+      arquivoSelecionado = null;
+      document.getElementById('input-amostra-file').value = '';
+      document.getElementById('preview-arquivo').classList.add('hidden');
+      atualizarBotaoGerar();
+    }
+
+    function atualizarBotaoGerar() {
+      const btn = document.getElementById('btn-gerar-laudo-amostra');
+      const pronto = modoAmostra === 'upload' ? !!arquivoSelecionado : exemploSelecionadoIdx !== null;
+      btn.disabled = !pronto;
+    }
+
+    function resumoBiomarcadores(bio) {
+      if (!bio || typeof bio !== 'object') return '—';
+      const pares = [];
+      for (const k of Object.keys(bio)) {
+        const v = bio[k];
+        if (typeof v === 'number') {
+          pares.push(`${k}: ${Number(v).toFixed(2)}`);
+        } else if (v && typeof v === 'object') {
+          const sub = Object.keys(v)[0];
+          if (sub && typeof v[sub] === 'number') pares.push(`${sub}: ${Number(v[sub]).toFixed(2)}`);
+        }
+        if (pares.length >= 3) break;
+      }
+      return pares.length ? pares.join(' · ') : '—';
+    }
+
+    function carregarExemplosDataset() {
+      const tbody = document.getElementById('tbody-banco');
+      tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400 text-xs">Carregando...</td></tr>';
+      fetch('/api/exemplos/' + RESULTADO_ID)
+        .then(r => r.json())
+        .then(rows => {
+          if (!Array.isArray(rows) || !rows.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400 text-xs">Nenhum exemplo disponível neste dataset.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = rows.map(r => {
+            const nome = (r.nome || `exemplo_${r.idx}`).replace(/'/g, "\\'");
+            const familia = r.familia || r.tipo || '—';
+            const resumo = resumoBiomarcadores(r.biomarcadores);
+            return `<tr class="border-b border-slate-50 hover:bg-teal-50/30 cursor-pointer transition-colors" onclick="selecionarExemplo(${r.idx}, '${nome}')">
+              <td class="px-3 py-2"><input type="radio" name="banco-radio" value="${r.idx}" class="accent-teal-600"></td>
+              <td class="px-3 py-2 font-mono text-slate-400">${r.idx}</td>
+              <td class="px-3 py-2 font-mono text-slate-700 truncate max-w-[160px]">${r.nome || '—'}</td>
+              <td class="px-3 py-2 text-slate-500">${r.categoria || '—'}</td>
+              <td class="px-3 py-2 text-slate-500">${familia}</td>
+              <td class="px-3 py-2 text-slate-500 truncate max-w-[200px]" title="${resumo}">${resumo}</td>
+            </tr>`;
+          }).join('');
+        })
+        .catch(() => {
+          tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-rose-400 text-xs">Erro ao carregar exemplos.</td></tr>';
+        });
+    }
+
+    function selecionarExemplo(idx, nome) {
+      exemploSelecionadoIdx = idx;
+      exemploSelecionadoNome = nome;
+      document.querySelectorAll('[name="banco-radio"]').forEach(r => r.checked = (parseInt(r.value) === idx));
+      const info = document.getElementById('banco-selecao-info');
+      document.getElementById('banco-selecao-label').textContent = `#${idx} — ${nome}`;
+      info.classList.remove('hidden');
+      atualizarBotaoGerar();
+    }
+
+    async function gerarLaudoAmostra() {
+      const btn = document.getElementById('btn-gerar-laudo-amostra');
+      const spinner = document.getElementById('spinner-amostra');
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+
+      let fonte = '';
+      const formData = new FormData();
+
+      if (modoAmostra === 'upload' && arquivoSelecionado) {
+        formData.append('arquivo', arquivoSelecionado);
+        fonte = `Upload: ${arquivoSelecionado.name}`;
+      } else if (exemploSelecionadoIdx !== null) {
+        formData.append('resultado_id', String(RESULTADO_ID));
+        formData.append('exemplo_idx', String(exemploSelecionadoIdx));
+        fonte = `Exemplo #${exemploSelecionadoIdx} — ${exemploSelecionadoNome}`;
+      }
+
+      try {
+        const resp = await fetch('/laudo_amostra', { method: 'POST', body: formData });
+        const data = await resp.json();
+
+        if (data.erro) throw new Error(data.erro);
+
+        const painel = document.getElementById('painel-laudo-amostra');
+        document.getElementById('label-fonte-laudo-amostra').textContent = fonte;
+        document.getElementById('conteudo-laudo-amostra').innerHTML = data.laudo_html;
+
+        const badge = document.getElementById('badge-inferencia-amostra');
+        const inf = data.inferencia_modelo;
+        if (inf && inf.disponivel) {
+          const pct = (inf.probabilidade * 100).toFixed(1);
+          const avisoFallback = inf.usou_fallback
+            ? `<p class="text-[11px] text-amber-700 mt-1.5">⚠️ Nenhum modelo treinado especificamente para "${inf.familia}" — usando o modelo mais recente disponível (família "${inf.familia_modelo}"). O resultado pode não ser confiável se for de outra modalidade.</p>`
+            : '';
+          badge.className = 'mb-4 rounded-xl border p-4 ' + (inf.usou_fallback ? 'bg-amber-50 border-amber-200' : 'bg-teal-50 border-teal-200');
+          badge.innerHTML = `
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-1">Classificação do modelo treinado</p>
+            <p class="text-lg font-bold text-slate-800">${inf.categoria} <span class="text-sm font-normal text-slate-500">(${pct}% de probabilidade)</span></p>
+            <p class="text-[11px] text-slate-500 mt-1">Modelo: ${inf.modelo} · ${inf.n_classes} classe(s) possível(is)</p>
+            ${avisoFallback}
+          `;
+          badge.classList.remove('hidden');
+        } else if (data.inferencia_erro) {
+          badge.className = 'mb-4 rounded-xl border p-4 bg-slate-50 border-slate-200';
+          badge.innerHTML = `<p class="text-[11px] text-slate-500">Classificação automática não disponível: ${data.inferencia_erro}</p>`;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+
+        painel.classList.remove('hidden');
+        painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {
+        alert('Erro ao gerar laudo: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    }
+
+
+  </script>
+
+</body>
+
+</html>

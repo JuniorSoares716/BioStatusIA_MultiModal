@@ -251,6 +251,10 @@ def avaliar_modelos(X: np.ndarray, y: np.ndarray, familia: str = "",
         metricas_finais["tempo_treino_s"] = round(t_treino, 3)
         # Score clínico multiobjetivo para o modelo
         metricas_finais["score_clinico"] = round(float(calcular_score_clinico(metricas_finais)), 4)
+        # Anexa os números da CV interna (os que REALMENTE decidiram o
+        # vencedor e o veto de sensibilidade) ao lado dos do held-out.
+        metricas_finais["sensibilidade_cv"] = resultado["metricas_cv"][nome]["sensibilidade"]["media"]
+        metricas_finais["score_clinico_cv"] = resultado["metricas_cv"][nome]["score_clinico"]
         resultado["metricas"][nome] = metricas_finais
 
         if len(classes) == 2:

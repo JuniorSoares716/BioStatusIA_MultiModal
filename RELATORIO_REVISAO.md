@@ -1531,3 +1531,464 @@ não garante que aquele dataset específico passe a ter sinal aprendível — se
 mesmo aleatório (a suspeita levantada no item 36), nem colunas categóricas vão ajudar. Mas agora,
 se houver QUALQUER relação real escondida numa coluna categórica (Gender, Blood Type, Admission
 Type, Test Results, Insurance Provider), o sistema tem como enxergar — antes, nem chance havia.
+
+## 38. Corrigida a confusão entre sensibilidade da CV interna e do held-out
+
+**Sua pergunta:** por que "nenhum modelo atingiu o piso" se o ranking mostra LogisticRegression
+com 81% de sensibilidade (acima do piso de 0.80)?
+
+**Achei a causa exata, e é mais grave do que parecia — não é só uma confusão de leitura, é a
+própria tabela se contradizendo.** O ranking que você via tinha dois problemas juntos:
+
+1. **A ordem da tabela** (medalhas 🥇🥈🥉) era baseada no score clínico do **held-out** (teste
+   final, 20%).
+2. **O vencedor de verdade** (marcado "VENCEDOR") é decidido pelo score clínico da **validação
+   cruzada interna** (5-fold × 3 repetições) — de propósito, para não deixar a escolha depender
+   de um único split de teste com sorte/azar.
+
+Essas duas fontes são **números diferentes para o mesmo modelo** — e a tabela só mostrava um
+deles (held-out), nunca o outro (CV interna), mesmo sendo o CV interna que decide tudo. Por
+isso o "vencedor" (SVM) aparecia na posição #3, atrás de modelos com held-out melhor — e a
+sensibilidade de 81% da LogisticRegression que você viu era só do held-out; a sensibilidade
+real que decidiu o veto (a da CV interna) provavelmente estava abaixo de 0.80, mas isso nunca
+aparecia na tela.
+
+**Correção:**
+1. As duas engines de treino (`classificador.py` e `avaliacao_modelos.py`) agora anexam a
+   sensibilidade e o score clínico da **CV interna** direto no dicionário de métricas de cada
+   modelo (ao lado dos números do held-out) — antes esses números existiam só em
+   `metricas_cv`, uma estrutura separada que o ranking nunca olhava.
+2. **A tabela agora ordena pelo critério real de seleção** (score clínico da CV interna) — o
+   "VENCEDOR" sempre aparece em 🥇 #1, consistente com a decisão real, nunca mais atrás de
+   outro modelo.
+3. Cada linha do ranking agora mostra **as duas sensibilidades**: a do held-out (número
+   principal) e a da CV interna, menor e ao lado ("CV: 61.9%") — para você ver exatamente qual
+   número decidiu o veto, sem precisar adivinhar.
+4. Nota explicativa adicionada acima do ranking, deixando claro que a ordenação usa CV interna
+   e o held-out é só para referência.
+5. Mesma correção aplicada na seção "AutoML — Dados Tabulares" (item 35), que tinha o mesmo
+   problema.
+
+**Testado:** reproduzi exatamente os números do seu print (SVM com score CV 0.4517 vencendo
+sobre LogisticRegression com score CV 0.30, apesar do held-out da LogisticRegression parecer
+melhor) — confirmei que agora o SVM aparece corretamente em 🥇 #1, e as duas sensibilidades
+(61.9% CV do SVM, 65.0% CV da LogisticRegression) aparecem lado a lado com a do held-out. 3
+novos testes automatizados. Suíte completa (127 testes) segue limpa; testado também que não
+quebra ao abrir resultados salvos antes desta correção (sem o campo novo, o Jinja não trava).
+
+**Resumo:** o cálculo sempre esteve certo (o veto genuinamente protege contra "sorte" de um
+único split de teste) — o problema era a tela misturar dois números diferentes sem dizer qual
+era qual. Agora os dois aparecem, claramente rotulados.
+
+## 39. Relatório final em PDF (combina todas as abas)
+
+**Pedido:** um jeito de gerar um relatório final, combinando os resultados de todas as abas
+(Estatísticas & Biomarcadores, Pré-processamento, AutoML, Laudo), num único PDF.
+
+**Implementação:**
+- Novo módulo `pipeline/relatorio_pdf.py` — monta o PDF com `reportlab` (Platypus), direto do
+  `pipeline_data` já salvo no banco (não recalcula nada, só formata o que já existe).
+- Novo botão **"Relatório PDF"** no cabeçalho da tela de resultados — baixa o arquivo na hora,
+  sem passo intermediário.
+- Nova rota `GET /relatorio_pdf/<resultado_id>`.
+
+**Seções do PDF (cada uma só aparece se os dados existirem naquela análise, igual à tela):**
+1. Cabeçalho — modo de operação, amostras, melhor modelo, classes, aviso ético.
+2. Estatísticas & Biomarcadores — tabela de estatísticas descritivas por variável.
+3. Pré-processamento — estratégias aplicadas e justificativas dos agentes.
+4. AutoML — ranking completo dos classificadores, matriz de confusão do vencedor. Reaproveita a
+   mesma correção de transparência do item 38: ordena pelo score da **validação cruzada
+   interna** (critério real de seleção) e mostra a sensibilidade da CV ao lado da do held-out —
+   consistente com o que a tela já mostra.
+5. AutoML — Dados Tabulares (quando multimodal com resultado tabular separado).
+6. Fusão Multimodal — comparação entre cada modalidade isolada e as duas formas de fusão.
+7. Laudo do Radiologista IA — o texto gerado pela IA, convertido de markdown pra formatação de
+   PDF (títulos, negrito, listas).
+
+**Bug real encontrado e corrigido durante os testes:** os símbolos especiais que uso na
+interface web (⚠, ★, •) **não existem na fonte padrão do reportlab** (Helvetica) — viravam um
+glifo "ausente" no PDF gerado (aparecia como "(cid:127)", um quadrado/caractere sem sentido, em
+vez do símbolo). Troquei por alternativas em texto puro ("AVISO:" em negrito no lugar de ⚠,
+"(VENCEDOR)" no lugar de ★, hífen no lugar do marcador de lista "•") — testado extraindo o texto
+de volta do PDF gerado e confirmando que nenhum glifo ausente aparece em lugar nenhum.
+
+**Outro bug encontrado pelo lint antes mesmo de rodar:** uma colisão de nome entre a variável
+local da matriz de confusão (`cm`) e a unidade de medida `cm` do reportlab (`from reportlab.lib.units
+import cm`) — teria quebrado silenciosamente a primeira vez que uma matriz de confusão real
+fosse renderizada. Corrigido renomeando a variável local antes de sequer testar.
+
+**Testado:**
+- PDF gerado com dados completos (multimodal + fusão + laudo em markdown) — extraí o texto de
+  volta (`pdfplumber`) e conferi que todas as seções aparecem corretamente.
+- Renderizei as páginas como imagem (`pdf2image`) e inspecionei visualmente — layout limpo,
+  tabelas bem formatadas, cores consistentes com a identidade visual do sistema.
+- Rota testada ponta a ponta pelo Flask real: PDF válido, `Content-Type: application/pdf`,
+  `Content-Disposition: attachment` (baixa direto), e 404 correto para resultado inexistente.
+- 6 novos testes automatizados (`tests/test_relatorio_pdf.py`), incluindo o teste específico que
+  trava a ausência de glifos quebrados. Suíte completa e `pyflakes` seguem limpos.
+- `reportlab` adicionado como dependência declarada em `pyproject.toml`.
+
+## 40. Processamento em lote — múltiplas bases independentes de uma vez
+
+**Pedido:** enviar várias bases de uma vez (ex.: 10), cada uma processada e mostrada
+individualmente — hoje só dava pra enviar uma por vez, e zipar várias juntas fazia o sistema
+tentar ler tudo misturado como um dataset só.
+
+**Decisão de arquitetura:** em vez de reescrever a rota `/analisar` (que já tem ~450 linhas e é
+usada por tudo), implementei o lote como uma **orquestração no navegador**: cada base é
+submetida à mesma rota já existente, em sequência — reaproveitando 100% da lógica já testada
+(confirmação de coluna-alvo, alinhamento multimodal, etc.), sem duplicar nada e sem risco de
+regressão na análise individual.
+
+**O que foi implementado:**
+
+1. **Detecção de bases misturadas num único upload** (`detectar_multiplas_bases()`) — quando uma
+   pasta/zip tem 3+ subpastas e a maioria delas já é, sozinha, uma base válida reconhecível, o
+   sistema oferece tratar como lote em vez de ler tudo misturado. Não confunde com a convenção
+   benign/malignant (que é parte de UMA base só) nem com uma organização legítima de subpastas
+   de um dataset multimodal.
+2. **Múltiplos arquivos no upload** — o campo de arquivo agora aceita selecionar vários de uma
+   vez; cada um vira uma base separada na fila.
+3. **Motor de processamento sequencial** (`processarLote`/`processarUmaBase`, JS) — percorre a
+   fila, submete cada base pra `/analisar`, e **sabe lidar com o modal de confirmação no meio do
+   lote** (coluna-alvo, alinhamento multimodal) sem travar o processo: quando uma base precisa de
+   confirmação, o modal aparece, a pessoa escolhe, e o lote continua pra próxima base
+   automaticamente — sem precisar reabrir nada.
+4. Botão "Enviar Nova Base" no modal vira **"Pular Esta Base"** quando em modo lote (pula sem
+   cancelar o resto da fila).
+5. Barra de progresso visual ("Base 3 de 10") durante o processamento.
+6. **Nova rota `/lote?ids=1,2,3...`** e tela de resumo — lista cada base processada com link
+   direto pro resultado completo de cada uma (reaproveita a tela de resultados já existente,
+   sem duplicar nenhuma visualização).
+
+**Testado:**
+- Detecção: 5 bases tabulares misturadas → detecta certo; pasta benign/malignant normal → NÃO
+  dispara (regressão); dataset multimodal legítimo com 2 subpastas → não dispara (precisa 3+).
+- Simulação completa via **jsdom** (DOM real, não mock): 3 bases em fila, a do meio pede
+  confirmação de coluna-alvo — confirmei que o modal aparece, que confirmar prossegue
+  corretamente pra próxima base (total de 4 chamadas de rede: base1 + base2 pedindo confirmação
+  + base2 confirmada + base3), e que a barra de progresso avança certo.
+- Testei também o botão "Pular Esta Base" — a base pulada não conta como sucesso, e o lote
+  segue pra próxima.
+- Ponta a ponta pelo Flask real: 3 bases com dados DIFERENTES entre si, processadas
+  separadamente, cada uma salvando o `dataset_path` correto (nenhuma mistura entre elas).
+- 8 novos testes automatizados (`tests/test_lote_multiplas_bases.py`).
+
+## 41. Histórico: "Categoria" misturava modo com diagnóstico, e "Família" sempre vazia
+
+**Sua pergunta:** por que faltam colunas no histórico, por que aparece "BENIGNO" como categoria,
+por que "Família" nunca aparece, e por que algumas bases deram "indefinida".
+
+**Achado real, confirmado no código:** o campo "categoria" no banco de dados era usado pra
+**duas coisas completamente diferentes** ao mesmo tempo — a rotina que salva cada análise
+(`salvar()`) grava ali ora o **modo da análise em maiúsculas** ("TABULAR", "SINAL_TEMPORAL",
+"DICOM_2D", "VOLUME_3D", "MULTIMODAL_EXPANDIDO"), ora o **diagnóstico real da primeira imagem**
+("BENIGNO"/"MALIGNO"/"INDEFINIDO", só para os modos baseados em crew de imagem) — dependendo de
+qual dos 6 pontos do código chamou essa função. A tela de histórico só tinha UMA coluna pra
+mostrar isso, misturando os dois conceitos sem aviso.
+
+**"Família" sempre "—":** essa coluna lê `familia_sinal`, um campo que só é preenchido pelo modo
+de **sinal temporal** (guarda o tipo real: ECG, EEG etc.) — para tabular, imagem, DICOM ou
+volume, nunca teve por design um valor aí. Não é um bug de cálculo, é uma coluna criada para um
+propósito bem mais específico do que o nome sugere.
+
+**Correção:**
+1. `listar_resultados_completo()` agora também lê o `modo` real de dentro do JSON já salvo de
+   cada análise (`pipeline_data.get("modo")`).
+2. Nova coluna **"Modo"** no histórico, sempre preenchida com o tipo real da análise (Tabular,
+   Dataset Rotulado, Sinal Temporal, etc.) — não depende mais de qual dos 6 pontos de código
+   salvou o resultado.
+3. A coluna **"Categoria"** agora só mostra o badge de diagnóstico (BENIGNO/MALIGNO/INDEFINIDO)
+   quando o modo é realmente baseado em imagem — nos outros casos mostra "—", em vez de repetir
+   o nome do modo como se fosse um diagnóstico.
+4. Coluna "Família" renomeada para "Tipo de Sinal" no cabeçalho, deixando claro o que ela
+   realmente representa.
+
+**Sobre o "N/A" e "indefinida" nos modelos** — achei mais um problema real ao investigar: as
+mensagens específicas do motivo (`aviso_classificador`, `erro_classificador`) **já eram
+calculadas e guardadas no backend, mas nunca apareciam na tela** — só o texto genérico "dados
+insuficientes" aparecia, escondendo o motivo real (que podia ser uma classe rara demais para
+estratificar, uma coluna com valor não-numérico, etc.). Corrigido: agora a tela de resultados
+mostra a mensagem específica guardada, com o erro técnico completo quando for uma exceção real —
+tanto para o resultado principal quanto para a parte tabular de uma análise multimodal (esse
+segundo caso antes não mostrava nem a mensagem genérica, ficava em branco).
+
+**O que suas bases marcadas "INDEFINIDO" provavelmente têm em comum**: são datasets de imagem
+organizados por **tipo de exame ou tipo de tumor** (ex.: pastas por região do corpo, ou por
+glioma/meningioma/pituitary), não pela convenção benign/malignant que o sistema reconhece — o
+mesmo padrão já confirmado no item 35 com o dataset ajithdari. Isso não é um bug, é uma limitação
+de escopo (a convenção de rótulo por pasta é intencionalmente restrita a benign/malignant); se
+quiser, dá pra estender pra reconhecer outras convenções de nome de pasta como próximo passo.
+
+**Testado:** 3 novos testes formais (`tests/test_historico_e_avisos_automl.py`) — confirmam que
+"modo" é extraído corretamente do JSON, que o histórico não mostra mais "TABULAR" como badge de
+diagnóstico, e que as 3 variações de mensagem de erro/aviso aparecem corretamente na tela de
+resultados (incluindo o caso específico da parte tabular dentro de multimodal, que antes não
+mostrava nada).
+
+**Recomendação prática:** pra descobrir o motivo exato de cada "N/A" no seu histórico, clica no
+👁 de cada linha — agora a aba AutoML vai te dizer especificamente se foi "dados insuficientes"
+(poucas amostras/classes) ou um erro técnico real (com a mensagem completa), em vez de deixar
+você adivinhando.
+
+## 42. Causa raiz encontrada: convenção "yes/no" não reconhecida (base real do usuário)
+
+**Você enviou a base real** (`08_Brain_MRI_Oncology_Real.zip`) que apareceu como "INDEFINIDO" /
+"N/A" no histórico. Abri o zip e conferi a estrutura de pastas de verdade — a causa é exatamente
+o tipo de limitação que eu tinha sinalizado no item 41 (convenção de nome de pasta fora do
+escopo reconhecido), agora com uma causa raiz 100% confirmada e concreta.
+
+**O que a base realmente tem:**
+```
+08_Brain_MRI_Oncology_Real/
+├── benign/      (pasta vazia, 0 arquivos)
+├── malignant/   (pasta vazia, 0 arquivos)
+├── no/          (98 imagens — SEM tumor)
+└── yes/         (155 imagens — COM tumor)
+```
+
+As pastas `benign`/`malignant` existem mas estão **vazias** — provavelmente sobras de uma
+tentativa anterior de organização. As 253 imagens de verdade (98+155, batendo exatamente com o
+"253 amostras" do relatório) estão em `yes`/`no` — a convenção clássica do dataset "Brain MRI
+Images for Brain Tumor Detection" do Kaggle (e de vários outros datasets de detecção de tumor).
+
+**Por que isso deu exatamente esse sintoma:** o modo já era detectado corretamente como
+"Dataset Rotulado" (`detectar_estrutura()` só confere se as pastas benign/malignant *existem*,
+não se têm arquivos dentro — e elas existem, vazias). Mas o rótulo de CADA imagem
+(`listar_imagens()`) é decidido pela pasta-mãe daquela imagem especificamente — e como `yes`/`no`
+não estavam na lista de nomes reconhecidos, as 253 imagens (que estão dentro de yes/no, não de
+benign/malignant) ficavam todas com rótulo indefinido. Por isso a distribuição de classes deu
+"0 benignas, 0 malignas, 253 indefinidas" mesmo com uma base perfeitamente binária.
+
+**Correção:** adicionei `"no"` à lista de pastas benignas e `"yes"` à lista de pastas malignas
+(`PASTAS_BENIGNAS`/`PASTAS_MALIGNAS` em `io_utils.py`) — mapeamento natural: yes = tem tumor
+(equivalente a maligno/positivo), no = não tem tumor (equivalente a benigno/negativo).
+
+**Testado com os dados reais que você mandou:**
+- `listar_imagens()` na pasta extraída do seu zip: **253 imagens, agora todas rotuladas**
+  (98 BENIGNO da pasta `no`, 155 MALIGNO da pasta `yes`, **zero indefinidas** — antes eram 253
+  indefinidas).
+- Rodei a extração de biomarcadores + AutoML numa amostra de 100 imagens reais da sua base:
+  **treinou de verdade** (LogisticRegression, 60% de acurácia, 71% de AUC) — antes dava
+  literalmente "N/A" porque não havia nenhum rótulo pra treinar.
+- Confirmei que pastas benign/malignant vazias coexistindo com yes/no não quebram nada (as
+  vazias simplesmente não contribuem arquivo nenhum, como já acontecia antes).
+- 3 novos testes automatizados (`tests/test_convencao_yes_no.py`). Suíte completa segue limpa
+  (mesmas 2 falhas conhecidas, por pacote ausente no meu ambiente).
+
+**Recomendação:** baixa esse zip, roda essa mesma base de novo — agora deve treinar
+normalmente, com "Dataset Rotulado" e uma distribuição real de 98 benignas / 155 malignas em vez
+de 253 indefinidas. O resultado de 60% de acurácia é modesto (a acurácia real também depende de
+quão discriminativos são os biomarcadores radiômicos pra esse tipo específico de tumor — isso é
+uma questão de qualidade de sinal na imagem, não mais um problema do sistema não conseguir ler a
+base).
+
+## 43. Segunda base real ("06_Brain_Tumor_MRI_Real") — detecção multi-classe por pasta implementada
+
+**Você enviou a segunda base** que também deu "INDEFINIDO"/"N/A". Abri o zip — esse caso é mais
+complexo que o anterior (item 42) e expôs uma lacuna real e importante: **o sistema nunca soube
+reconhecer rótulo por pasta além do caso binário**, mesmo já suportando treino multi-classe
+desde antes nesta sessão.
+
+**O que a base realmente tem:**
+```
+06_Brain_Tumor_MRI_Real/
+├── benign/              (vazia, 0 arquivos — mesma sobra do caso anterior)
+├── malignant/           (vazia, 0 arquivos)
+├── Training/
+│   ├── glioma/          (1400 imagens)
+│   ├── meningioma/      (1400 imagens)
+│   ├── notumor/         (1400 imagens)
+│   └── pituitary/       (1400 imagens)
+└── Testing/
+    ├── glioma/          (400 imagens)
+    ├── meningioma/      (400 imagens)
+    ├── notumor/         (400 imagens)
+    └── pituitary/       (400 imagens)
+```
+Total: 7.200 imagens (bate exatamente com o relatório) — é o dataset clássico "Brain Tumor MRI
+Dataset" do Kaggle, com 4 classes reais de tumor, organizado em split treino/teste.
+
+**Por que deu "INDEFINIDO":** `listar_imagens()` só sabia reconhecer a convenção binária
+(benign/malignant, e agora yes/no — item 42). Nomes de pasta como "glioma", "meningioma",
+"notumor", "pituitary" não batiam com nada reconhecido — e como o AutoML já tinha suporte a
+multi-classe (itens 31-32), mas a **detecção de rótulo pela pasta nunca soube produzir mais que
+0/1/None**, essa base nunca tinha chance de ser rotulada corretamente, mesmo sendo um caso de
+classificação perfeitamente organizado.
+
+**Implementação — `listar_imagens()` reescrita com 2 estratégias, nessa ordem:**
+1. **Convenção binária conhecida** (como antes) — se houver imagens de verdade em pastas
+   benign/malignant/yes/no/etc., usa a categoria clínica BENIGNO/MALIGNO (mais informativa que
+   um nome de pasta genérico).
+2. **Estrutura multi-classe genuína** (novo) — quando não há convenção binária com imagens reais,
+   mas existem **2 a 20 nomes de pasta distintos**, cada um contendo suas próprias imagens, cada
+   nome vira uma classe (rótulo = índice alfabético, categoria = o nome da pasta em maiúsculas).
+   Lida corretamente com pastas de split (Training/Testing/Train/Test/Val/...) — quando a pasta
+   imediata é um indicador de split, olha a pasta avó para achar o nome real da classe, unindo
+   corretamente as imagens de treino e teste da mesma classe sob o mesmo rótulo.
+3. **Proteção contra falso positivo**: limite de 20 classes — uma pasta por paciente (dezenas de
+   nomes distintos, não relacionados a classificação) continua corretamente como INDEFINIDO, em
+   vez de virar um problema de classificação de dezenas de classes sem sentido.
+
+**Testado com os dados reais do seu zip:**
+- `listar_imagens()`: **7.200 imagens, todas rotuladas corretamente** em 4 classes balanceadas
+  (1800 cada — 400 teste + 1400 treino por classe, unificados sob o mesmo rótulo). Zero
+  indefinidas (antes eram 7.200 indefinidas).
+- Extração + AutoML numa amostra real balanceada (160 imagens, 40 de cada classe): **treinou de
+  verdade** — RandomForest venceu com **59,4% de acurácia** (bem acima do acaso de 25% para 4
+  classes) e **79,4% de AUC**, matriz de confusão 4×4 correta.
+- 6 novos testes automatizados (`tests/test_multiclasse_pastas_imagem.py`), incluindo: detecção
+  das 4 classes, unificação correta através de Training/Testing, coexistência com pastas
+  binárias vazias (exatamente o cenário reportado), prioridade da convenção binária quando ela
+  tem imagens de verdade, e a proteção contra falso positivo com muitas pastas distintas.
+- Suíte completa (156 testes) e `pyflakes` seguem limpos — nenhuma regressão nos outros cenários
+  binários já testados.
+
+**Recomendação:** baixa esse zip e roda essa base de novo — agora deve sair "Dataset Rotulado"
+com 4 classes reais (glioma/meningioma/notumor/pituitary) treinando de verdade, em vez de tudo
+indefinido. Os ~60% de acurácia são um resultado real e razoável pra um problema de 4 classes
+usando só biomarcadores radiômicos (não uma rede neural convolucional dedicada) — dá pra
+considerar bom o suficiente pra triagem preliminar, mas como sempre, sujeito à mesma limitação
+de qualidade de sinal discutida nos casos anteriores.
+
+## 44. Histórico: coluna "Tipo de Sinal" sempre mostrava o código interno (F1/F3/F4)
+
+Investigando sua pergunta sobre quais valores podem aparecer nas colunas do histórico, achei
+mais um bug de exibição: a coluna mostrava `familia_sinal or sinal_tipo` — só que
+`familia_sinal` é sempre um código interno fixo ("F1" para sinal, "F3" para DICOM, "F4" para
+volume 3D), sempre presente, então o `sinal_tipo` (bem mais descritivo — "ECG/PhysioNet", "EEG",
+a modalidade DICOM real como "CT"/"MR", etc.) nunca tinha chance de aparecer. Invertida a
+prioridade: agora mostra o tipo descritivo primeiro, com o código interno só como último recurso.
+Testado e confirmado.
+
+## 45. Duas causas raízes reais de "N/A" — detecção de coluna-alvo era frágil demais
+
+**Você enviou as duas bases reais** (Parkinsons Vocal Biomarkers, MITBIH_PTB_ECG_Signals) que
+davam N/A mesmo sendo tabulares com coluna-alvo perfeitamente válida. Investiguei as duas a
+fundo — são **dois bugs REAIS e distintos** na detecção automática de coluna-alvo, ambos
+silenciosos (não geravam erro nenhum, só resultavam em `label_idx = None` e portanto nenhum
+treino).
+
+### Bug 1 — coluna-alvo no meio do arquivo (Parkinsons)
+A heurística automática só verificava a **primeira e a última coluna** do CSV (além de nomes
+reconhecidos como "diagnosis", "target" etc.). No dataset real, a coluna certa é `status`
+(1=Parkinson, 0=saudável) — mas ela é a **17ª de 23 colunas**, no meio do arquivo, com um nome
+que não estava na nossa lista de palavras-chave. Como não é nem a primeira nem a última, a
+detecção nunca a via.
+
+**Correção:** quando nem o nome nem a posição (primeira/última) funcionam, o sistema agora
+escaneia **todas as colunas**. Se encontrar **exatamente uma** candidata plausível (2 a 10
+valores únicos), usa ela automaticamente — sem ambiguidade, não precisa nem do modal. Se
+encontrar 2 ou mais, deixa como estava (o portão de confirmação já cuida de perguntar).
+
+### Bug 2 — arquivo ordenado por classe (MIT-BIH ECG)
+Esse foi mais sutil. A coluna-alvo real (a última, com 5 classes de arritmia) **existe e está no
+lugar certo** — mas o arquivo vem **ordenado por classe**: as primeiras 18.118 linhas (de 21.892)
+são TODAS da classe 0; a diversidade de classes só aparece a partir da linha 18.119. Qualquer
+checagem baseada numa amostra do início do arquivo (as nossas duas funções de detecção usavam
+uma amostra de 50-200 linhas) nunca via mais que 1 valor único ali, e descartava a coluna certa
+por parecer constante.
+
+**Correção:** as duas funções de detecção (`detectar_schema` e `candidatos_coluna_alvo`) agora
+escaneiam a base **inteira** por coluna, em vez de uma amostra do início — mas com **saída
+antecipada** assim que uma coluna ultrapassa 10 valores distintos (a maioria das colunas
+numéricas contínuas estoura esse limite nas primeiras dezenas de linhas, então isso continua
+rápido mesmo em bases largas: testei explicitamente com 5.000 linhas × 50 colunas contínuas e a
+detecção completa em menos de 5 segundos).
+
+**Testado com os dados reais das duas bases que você mandou:**
+- **Parkinsons**: `status` detectado automaticamente (antes: nenhuma coluna detectada). Treinei
+  de verdade: **MLP venceu com 94,9% de acurácia, 99% de AUC, 96,6% de sensibilidade**.
+- **MIT-BIH ECG**: última coluna (5 classes de arritmia) detectada automaticamente, mesmo com o
+  arquivo ordenado por classe. Confirmei a performance — detecção em 0,01s mesmo com
+  21.892 linhas × 188 colunas. Treinei numa amostra balanceada real: **GradientBoosting venceu
+  com 78% de acurácia, 95,6% de AUC**, 5 classes corretas.
+- 5 novos testes automatizados (`tests/test_deteccao_robusta_coluna_alvo.py`), incluindo um
+  teste de desempenho que trava a detecção em bases largas abaixo de 5 segundos, e um teste que
+  confirma que a ambiguidade genuína (2+ candidatas) continua corretamente delegada ao portão de
+  confirmação, sem auto-escolher errado.
+- Suíte completa (161 testes) e `pyflakes` seguem limpos.
+
+## 46. Histórico: tabela cortando a última coluna (corrigido) + esclarecimento sobre "Tipo de Sinal"
+
+**Tabela cortada:** a correção anterior (item 41) adicionou a coluna "Modo", passando de 8 para
+9 colunas competindo por espaço num container limitado a 1280px de largura — daí o corte e a
+barra de rolagem. Corrigido: container alargado para 1680px, padding das células reduzido, e a
+coluna "Dataset" agora trunca nomes muito longos (com o nome completo disponível ao passar o
+mouse) em vez de forçar largura extra. **Não consegui gerar um print renderizado de verdade
+aqui** (o Tailwind CDN que a página usa está bloqueado no meu ambiente de teste) — a correção é
+matematicamente sólida (a soma das larguras das 9 colunas cabe confortavelmente nos 1680px
+mesmo com conteúdo real), mas peço que confirme visualmente na sua tela depois de atualizar.
+
+**Sobre "Tipo de Sinal" não aparecer nas suas duas bases**: isso está correto, não é bug — tanto
+o Parkinsons quanto o MIT-BIH ECG foram enviados como **CSV** (dados tabulares já extraídos), não
+como arquivos de sinal bruto (.edf/.hea/.dat lidos diretamente). Por isso o modo é "Tabular", e
+essa coluna genuinamente não se aplica (mostra "—", como qualquer outra base tabular). Ela só é
+preenchida quando o sistema processa sinal bruto de verdade (modo "Sinal Temporal"), e essa parte
+já foi corrigida no item 44 (antes mostrava sempre o código interno "F1" em vez do tipo real).
+
+## 47. Histórico unificado visualmente com o Resumo do Lote + botão de imprimir relatório
+
+**Pedido:** fazer o Histórico mostrar informações e botões do mesmo jeito que o Resumo do Lote,
+e acrescentar o botão de imprimir relatório.
+
+**Implementado:**
+1. **Coluna "Status"** adicionada ao Histórico (igual ao Lote) — badge "Concluído" (verde) ou
+   "Erro no treino" (vermelho, com o erro técnico completo no tooltip). Backend:
+   `listar_resultados_completo()` agora também extrai `erro_classificador`/
+   `erro_classificador_tabular` do JSON salvo (mesmo campo que o item 45 corrigiu para aparecer
+   na tela de resultados).
+2. **Botão "Ver resultado"** no Histórico trocado do ícone solto pelo botão estilizado
+   (ícone + texto), igual ao do Lote.
+3. **Novo botão "Imprimir relatório"** adicionado nas duas telas (Histórico E Lote) — baixa o
+   PDF completo daquela análise direto (rota `/relatorio_pdf/<id>` já existente, item 39).
+   Empilhei os dois botões verticalmente na célula de ações (em vez de lado a lado) para não
+   alargar ainda mais uma tabela que já tinha 9 colunas.
+4. Card de resumo "Famílias Distintas" corrigido para "Modos Distintos" — antes mostrava os
+   códigos internos (F1/F3/F4, pouco úteis), agora mostra os modos reais (Tabular, Dataset
+   Rotulado, etc.), consistente com a correção do item 41.
+
+**Testado:** renderizei as duas páginas via Flask real, com um caso de sucesso e um caso de erro
+real de treino — confirmei que o badge de status certo aparece para cada um, que os dois botões
+aparecem com os links corretos (`/resultados/<id>` e `/relatorio_pdf/<id>`) nas duas telas.
+4 novos testes automatizados (`tests/test_historico_lote_visual.py`).
+
+**Nota sobre isolamento de teste:** meu primeiro teste usava contagem exata de ocorrências
+("Ver resultado" aparece exatamente 2 vezes") — isso quebrou ao rodar a suíte inteira, porque a
+página de Histórico mostra até 200 análises do banco compartilhado entre testes, não só as que
+o teste específico criou. Corrigido verificando o conteúdo específico esperado em vez de contar
+ocorrências totais — suíte completa confirmada limpa depois.
+
+## 48. Investigação: "Pular Esta Base" parecendo voltar pra home
+
+**Seu relato:** ao clicar em "Pular Esta Base" durante um lote, esperava continuar vendo a
+contagem/progresso das outras bases, mas voltou pra home.
+
+**O que testei e confirmou funcionar corretamente:** simulei o fluxo completo com DOM real
+(jsdom) várias vezes — incluindo disparando o envio do formulário de verdade com 2 arquivos
+selecionados (não só chamando as funções internas diretamente) — e em todos os cenários que
+consegui reproduzir, pular uma base **corretamente continua pra próxima da fila**, sem nenhuma
+navegação prematura. O contador de chamadas de rede confirma isso: pular a base 1 e ter a base 2
+processada gera exatamente as chamadas esperadas para as duas.
+
+**Um cenário real que encontrei e que provavelmente explica o que você viu:** todo o
+processamento do lote acontece **em cima da própria tela de envio** (não navega pra lugar
+nenhum durante o processo) — só existe uma navegação real no FINAL, quando pelo menos uma base
+deu certo (`/lote?ids=...`). Se você pular a **única base restante da fila** (ex.: um lote de 1
+base só, ou a última que sobrou depois de pular as outras), o sistema mostra um aviso "nenhuma
+base gerou resultado" — e como a tela de fundo sempre foi a home (o lote nunca saiu dela), fechar
+esse aviso dá a impressão de "voltou pra home", mesmo sem ter navegado de verdade.
+
+**Corrigido — mensagem bem mais clara nesse caso**, deixando explícito que você está de volta à
+tela de envio, nada foi perdido, e pode tentar de novo. Antes: "Nenhuma base do lote foi
+processada com sucesso" + lista de erros, sem contexto. Agora: conta quantas foram puladas por
+você separadamente de quantas falharam de verdade, e afirma explicitamente "você está de volta à
+tela de envio — nada foi perdido".
+
+**Se isso não for exatamente o que você viu** (por exemplo, se pulou uma base no MEIO da fila,
+não a última, e mesmo assim caiu na home sem processar as seguintes) — me avise quantas bases
+tinha o lote e em qual posição pulou, que eu investigo mais a fundo com esse cenário específico.
+Testei extensivamente mas não tenho como reproduzir 100% o comportamento de um navegador real
+neste ambiente.
+
+Suíte completa (165 testes) segue limpa, nenhuma regressão.

@@ -77,14 +77,14 @@
     <!-- Drag & Drop Zone -->
     <div class="relative group cursor-pointer border-2 border-dashed border-primary-container rounded-xl p-12 text-center transition-all duration-300 hover:bg-primary/5 mb-8" id="drop-zone"
          onclick="document.getElementById('arquivo').click()">
-      <input id="arquivo" name="arquivo" type="file" class="absolute inset-0 opacity-0 cursor-pointer" onchange="mostrarNome(this)"
+      <input id="arquivo" name="arquivo" type="file" multiple class="absolute inset-0 opacity-0 cursor-pointer" onchange="mostrarNome(this)"
              accept=".zip,.tar.gz,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.csv,.txt,.tsv,.edf,.bdf,.dat,.hea,.mat,.dcm,.nii,.gz,.mha"/>
       <div class="flex flex-col items-center pointer-events-none">
         <div class="w-16 h-16 bg-primary-fixed rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
           <span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
         </div>
-        <h3 class="text-xl font-semibold text-on-surface mb-1">Arraste um arquivo, ZIP ou pasta aqui</h3>
-        <p class="text-on-surface-variant">ou clique para selecionar do seu computador</p>
+        <h3 class="text-xl font-semibold text-on-surface mb-1">Arraste um ou mais arquivos, ZIPs ou pastas aqui</h3>
+        <p class="text-on-surface-variant">ou clique para selecionar do seu computador — pode escolher várias bases de uma vez</p>
         <p id="nome-arquivo" class="text-primary text-sm mt-3 font-semibold hidden"></p>
       </div>
     </div>
@@ -274,6 +274,18 @@
   <p class="text-on-surface-variant/70 text-xs mt-4">Pode levar de 2 a 10 minutos dependendo do tamanho do dataset.</p>
 </div>
 
+<!-- Loading overlay -- LOTE (multiplas bases) -->
+<div id="loading-lote" class="fixed inset-0 bg-white/90 backdrop-blur-sm flex-col items-center justify-center z-[65]" style="display:none">
+  <div class="w-14 h-14 border-4 border-primary-fixed border-t-primary rounded-full animate-spin mb-6"></div>
+  <p class="text-on-surface font-semibold text-lg">Processando lote de bases...</p>
+  <p id="loading-lote-progresso" class="text-primary text-sm font-bold mt-2">Base 1 de N</p>
+  <p id="loading-lote-nome" class="text-on-surface-variant text-sm mt-1 max-w-md text-center truncate"></p>
+  <div class="w-72 bg-surface-container rounded-full h-2 mt-4 overflow-hidden">
+    <div id="loading-lote-barra" class="bg-primary h-full transition-all" style="width:0%"></div>
+  </div>
+  <p class="text-on-surface-variant/70 text-xs mt-4">Cada base é processada de forma totalmente independente — pode levar bastante tempo para lotes grandes.</p>
+</div>
+
 <!-- Footer -->
 <footer class="w-full mt-auto flex flex-col md:flex-row justify-between items-center px-8 bg-surface-container-low border-t border-outline-variant py-8">
   <div class="flex flex-col items-center md:items-start mb-4 md:mb-0">
@@ -291,10 +303,13 @@
   // ── Utilitários de UI ──────────────────────────────────────────────────
   function mostrarNome(input) {
     const el = document.getElementById('nome-arquivo');
-    if (input.files && input.files[0]) {
-      el.textContent = input.files[0].name;
+    if (input.files && input.files.length) {
+      const todosValidos = Array.from(input.files).every(f => validarArquivoLocal(f));
+      if (!todosValidos) return;
+      el.textContent = input.files.length === 1
+        ? input.files[0].name
+        : `${input.files.length} arquivos selecionados — cada um será processado como uma base separada`;
       el.classList.remove('hidden');
-      validarArquivoLocal(input.files[0]);
     }
   }
   function mostrarLoading() {
@@ -442,6 +457,7 @@
 
   // ── Modal de confirmação multimodal / escolha de coluna-alvo ────────────
   const modalMM = document.getElementById('modal-multimodal');
+  let resolverModalLote = null;  // quando setado, o modal resolve uma Promise em vez de navegar (modo lote)
   const ROTULOS_FAMILIA_ICONE = {
     imagem: '🩻', tabular: '📋', sinal_temporal: '💓', dicom: '🖼️', volume_3d: '🧊',
   };
@@ -466,6 +482,11 @@
       titulo.textContent = 'Qual é a classe-alvo desta análise?';
       subtitulo.textContent = 'Encontramos mais de uma coluna que pode ser o rótulo a prever. Escolha qual delas usar — vale tanto para o AutoML quanto para os classificadores tradicionais.';
     }
+    if (resolverModalLote && payload._nomeLote) {
+      subtitulo.textContent += ` (${payload._nomeLote})`;
+    }
+
+    document.getElementById('mm-btn-nova-base').textContent = resolverModalLote ? 'Pular Esta Base' : 'Enviar Nova Base';
 
     // ── Seção: tipos de dado encontrados (só se for multimodal) ──────────
     document.getElementById('mm-secao-modalidades').style.display = temModalidades ? 'block' : 'none';
@@ -615,7 +636,7 @@
 
     document.getElementById('mm-btn-fundir').onclick = async () => {
       modalMM.style.display = 'none';
-      mostrarLoading();
+      if (!resolverModalLote) mostrarLoading();
       try {
         const fd = new FormData();
         fd.append('caminho_manual', payload.dataset_path);
@@ -626,24 +647,141 @@
           classesMarcadas().forEach(v => fd.append('classes_selecionadas', v));
         }
         const resp2 = await fetch(form.action, { method: 'POST', body: fd });
-        if (resp2.ok) { window.location.href = resp2.url; return; }
+        if (resp2.ok) {
+          if (resolverModalLote) {
+            const m = resp2.url.match(/\/resultados\/(\d+)/);
+            const resolve = resolverModalLote; resolverModalLote = null;
+            resolve({ sucesso: true, resultado_id: m ? m[1] : null });
+            return;
+          }
+          window.location.href = resp2.url;
+          return;
+        }
         esconderLoading();
         let dados2;
         try { dados2 = await resp2.json(); } catch { dados2 = { mensagem: `Erro inesperado (HTTP ${resp2.status}).` }; }
+        if (resolverModalLote) {
+          const resolve = resolverModalLote; resolverModalLote = null;
+          resolve({ sucesso: false, erro: dados2.mensagem || 'Erro ao processar esta base.' });
+          return;
+        }
         abrirModal({ titulo: 'Não foi possível iniciar a análise', mensagem: dados2.mensagem, exemplo: dados2.exemplo_correto || null });
       } catch (err) {
         esconderLoading();
+        if (resolverModalLote) {
+          const resolve = resolverModalLote; resolverModalLote = null;
+          resolve({ sucesso: false, erro: 'Erro de conexão ao processar esta base.' });
+          return;
+        }
         abrirModal({ titulo: 'Erro de conexão', mensagem: 'Não foi possível se comunicar com o servidor. Tente novamente.' });
       }
     };
 
     document.getElementById('mm-btn-nova-base').onclick = () => {
+      if (resolverModalLote) {
+        const resolve = resolverModalLote; resolverModalLote = null;
+        resolve({ sucesso: false, pulado: true });
+        return;
+      }
       window.location.href = '/';
     };
 
     modalMM.style.display = 'flex';
   }
-  modalMM.addEventListener('click', (e) => { if (e.target === modalMM) modalMM.style.display = 'none'; });
+  modalMM.addEventListener('click', (e) => { if (e.target === modalMM && !resolverModalLote) modalMM.style.display = 'none'; });
+
+  // ── Orquestração de lote (múltiplas bases processadas em sequência) ────
+  function atualizarProgressoLote(atual, total, nome) {
+    document.getElementById('loading-lote-progresso').textContent = `Base ${atual} de ${total}`;
+    document.getElementById('loading-lote-nome').textContent = nome;
+    document.getElementById('loading-lote-barra').style.width = `${Math.round((atual - 1) / total * 100)}%`;
+  }
+
+  function processarUmaBase(formData) {
+    return new Promise((resolve) => {
+      (async () => {
+        try {
+          const resp = await fetch(form.action, { method: 'POST', body: formData });
+          if (resp.redirected) {
+            const m = resp.url.match(/\/resultados\/(\d+)/);
+            resolve({ sucesso: true, resultado_id: m ? m[1] : null });
+            return;
+          }
+          if (resp.ok) {
+            const dados = await resp.json();
+            if (dados.multiplas_bases) {
+              // Lote aninhado (zip dentro de zip) -- processa cada sub-base
+              // recursivamente, na mesma sequência, sem precisar de outra confirmação.
+              const subResultados = [];
+              for (const sub of dados.bases) {
+                const fdSub = new FormData();
+                fdSub.append('caminho_manual', sub.caminho);
+                fdSub.append('ignorar_lote', '1');
+                const r = await processarUmaBase(fdSub);
+                if (r.sucesso) subResultados.push(r.resultado_id);
+              }
+              resolve({ sucesso: subResultados.length > 0, resultado_ids_multiplos: subResultados });
+              return;
+            }
+            if (dados.precisa_confirmacao) {
+              dados._nomeLote = formData.get('caminho_manual') || '';
+              resolverModalLote = resolve;
+              abrirModalMultimodal(dados, formData);
+              return; // a Promise só resolve quando o usuário interagir com o modal
+            }
+            resolve({ sucesso: false, erro: dados.mensagem || 'Resposta inesperada do servidor.' });
+            return;
+          }
+          let dados;
+          try { dados = await resp.json(); } catch { dados = {}; }
+          resolve({ sucesso: false, erro: dados.mensagem || `Erro inesperado (HTTP ${resp.status}).` });
+        } catch (e) {
+          resolve({ sucesso: false, erro: 'Erro de conexão: ' + e.message });
+        }
+      })();
+    });
+  }
+
+  async function processarLote(itens) {
+    document.getElementById('loading-lote').style.display = 'flex';
+    const resultadoIds = [];
+    const erros = [];
+
+    let puladas = 0;
+    for (let i = 0; i < itens.length; i++) {
+      atualizarProgressoLote(i + 1, itens.length, itens[i].nome);
+      const r = await processarUmaBase(itens[i].formData);
+      if (r.sucesso) {
+        if (r.resultado_ids_multiplos) resultadoIds.push(...r.resultado_ids_multiplos);
+        else if (r.resultado_id) resultadoIds.push(r.resultado_id);
+      } else if (r.pulado) {
+        puladas++;
+      } else {
+        erros.push(`${itens[i].nome}: ${r.erro || 'falhou'}`);
+      }
+    }
+
+    document.getElementById('loading-lote').style.display = 'none';
+
+    if (resultadoIds.length === 0) {
+      const partes = [];
+      if (puladas) partes.push(`${puladas} pulada(s) por você`);
+      if (erros.length) partes.push(erros.join(' | '));
+      abrirModal({
+        titulo: 'Nenhuma base do lote gerou resultado',
+        mensagem: (partes.length ? partes.join(' — ') + '. ' : '') +
+          'Você está de volta à tela de envio — nada foi perdido, é só selecionar outra base (ou as mesmas de novo) para tentar de novo.',
+      });
+      return;
+    }
+    if (puladas || erros.length) {
+      // Redireciona para o resumo mesmo com sucesso parcial — a pessoa ainda
+      // quer ver os resultados que DERAM certo, mesmo que outras tenham sido
+      // puladas ou falhado.
+      console.info(`Lote concluído com sucesso parcial: ${resultadoIds.length} ok, ${puladas} pulada(s), ${erros.length} com erro.`);
+    }
+    window.location.href = '/lote?ids=' + resultadoIds.join(',');
+  }
 
   // ── Envio do formulário (validação client-side + fetch com tratamento de erro) ──
   const form = document.getElementById('form-analise');
@@ -678,6 +816,18 @@
       return;
     }
 
+    // ── Múltiplos arquivos selecionados -> processa cada um como uma base separada ──
+    if (arquivoInput.files && arquivoInput.files.length > 1) {
+      const itens = Array.from(arquivoInput.files).map(f => {
+        const fd = new FormData();
+        fd.append('arquivo', f);
+        fd.append('tipo_sinal', document.getElementById('tipo_sinal')?.value || 'auto');
+        return { nome: f.name, formData: fd };
+      });
+      await processarLote(itens);
+      return;
+    }
+
     const dadosFormulario = new FormData(form);
     mostrarLoading();
     try {
@@ -689,9 +839,19 @@
         return;
       }
       if (resp.ok) {
-        // Status 200 sem redirect -> pode ser o pedido de confirmação multimodal.
+        // Status 200 sem redirect -> pode ser confirmação multimodal OU múltiplas bases.
         const dados = await resp.json();
         esconderLoading();
+        if (dados.multiplas_bases) {
+          const itens = dados.bases.map(b => {
+            const fd = new FormData();
+            fd.append('caminho_manual', b.caminho);
+            fd.append('ignorar_lote', '1');
+            return { nome: b.nome, formData: fd };
+          });
+          await processarLote(itens);
+          return;
+        }
         if (dados.precisa_confirmacao) {
           abrirModalMultimodal(dados, dadosFormulario);
           return;

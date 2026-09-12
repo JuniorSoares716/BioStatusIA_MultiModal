@@ -271,6 +271,12 @@ def treinar_vetores(X: np.ndarray, y: np.ndarray, scaling: str = "standard",
         # NÃO é usado para decidir o vencedor (essa decisão já foi tomada via
         # metricas_cv, acima, antes de este fold de teste ser sequer olhado).
         metricas_finais["score_clinico"] = round(float(calcular_score_clinico(metricas_finais)), 4)
+        # Anexa os números da CV interna (os que REALMENTE decidiram o
+        # vencedor e o veto de sensibilidade) ao lado dos do held-out — para
+        # a interface poder mostrar os dois e ordenar pelo critério real de
+        # seleção, em vez de misturar as duas fontes sem indicar qual é qual.
+        metricas_finais["sensibilidade_cv"] = metricas_cv[nome]["sensibilidade"]["media"]
+        metricas_finais["score_clinico_cv"] = metricas_cv[nome]["score_clinico"]
         resultado["metricas"][nome] = metricas_finais
 
         if len(classes) == 2:

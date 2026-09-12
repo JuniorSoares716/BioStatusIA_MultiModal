@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BioStatusIA — Resumo do Lote</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: { extend: {
+      colors: {
+        "on-surface": "#111c2d", "primary": "#005c55", "surface": "#f9f9ff", "background": "#f9f9ff",
+        "on-background": "#111c2d", "surface-container-low": "#f0f3ff", "surface-container": "#e7eeff",
+        "surface-container-high": "#dee8ff", "surface-container-lowest": "#ffffff", "secondary": "#216963",
+        "outline": "#6e7977", "outline-variant": "#bdc9c6", "on-surface-variant": "#3e4947",
+        "primary-container": "#0f766e", "on-primary-container": "#a3faef", "on-primary": "#ffffff",
+        "primary-fixed": "#9cf2e8", "secondary-container": "#a8ece5", "on-secondary-container": "#266d68",
+        "tertiary-fixed": "#ffdcc3", "tertiary-container": "#a15600", "on-tertiary-fixed": "#2f1500",
+        "error": "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a"
+      },
+      borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      fontFamily: { "sans": ["Inter"] }
+    } }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .zebra tr:nth-child(even) { background-color: rgba(15,118,110,.03); }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col" style="font-family:Inter,sans-serif">
+
+<nav class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 bg-primary-container shadow-sm h-16">
+  <div class="flex items-center gap-8">
+    <span class="text-xl font-bold text-on-primary-container">🧬 BioStatusIA</span>
+    <div class="hidden md:flex items-center gap-6 text-sm">
+      <a class="text-on-primary-container/80 hover:text-on-primary-container transition-colors" href="/">Dashboard</a>
+      <a class="text-on-primary-container/80 hover:text-on-primary-container transition-colors" href="/historico">Histórico</a>
+    </div>
+  </div>
+</nav>
+
+<main class="flex-grow pt-24 pb-12 px-6">
+<div class="max-w-7xl mx-auto">
+
+  <div class="mb-8 p-4 bg-tertiary-fixed border border-tertiary-container rounded-lg flex gap-3 items-start shadow-sm">
+    <span class="material-symbols-outlined text-tertiary-container mt-0.5">warning</span>
+    <p class="text-on-tertiary-fixed text-sm">Esta é uma ferramenta de suporte à decisão baseada em IA e não substitui o diagnóstico clínico realizado por um médico.</p>
+  </div>
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight text-on-surface">Resumo do Lote</h1>
+      <p class="text-sm text-on-surface-variant mt-1">
+        {{ itens|length }} de {{ n_solicitados }} base(s) processada(s) com sucesso — cada uma foi analisada de forma
+        totalmente independente (própria extração, próprio AutoML, próprio resultado).
+      </p>
+    </div>
+    <a href="/" class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-container text-on-primary-container rounded-lg text-sm font-bold hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined text-lg">add</span> Enviar Novo Lote
+    </a>
+  </div>
+
+  {% if not itens %}
+  <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-10 text-center shadow-sm">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">folder_off</span>
+    <p class="text-on-surface-variant text-sm">Nenhum resultado encontrado para este lote.</p>
+  </div>
+  {% else %}
+  <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden mb-8">
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm zebra">
+      <thead>
+        <tr class="bg-surface-container-high text-on-surface-variant text-left">
+          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Base</th>
+          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Modo</th>
+          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Amostras</th>
+          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Melhor Modelo</th>
+          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Status</th>
+          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody style="font-variant-numeric:tabular-nums">
+        {% for it in itens %}
+        <tr class="border-t border-outline-variant/40 hover:bg-primary/5 transition-colors">
+          <td class="px-6 py-4 font-semibold text-on-surface">{{ it.nome_base }}</td>
+          <td class="px-6 py-4 text-on-surface-variant">{{ (it.modo or '—')|replace('_', ' ')|title }}</td>
+          <td class="px-6 py-4 text-on-surface-variant">{{ it.n_amostras }}</td>
+          <td class="px-6 py-4 font-semibold text-primary">{{ it.melhor_modelo or 'N/A' }}</td>
+          <td class="px-6 py-4">
+            {% if it.erro %}
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-error-container text-on-error-container" title="{{ it.erro }}">Erro no treino</span>
+            {% else %}
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">Concluído</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <div class="flex flex-col items-stretch gap-1.5 min-w-[150px] mx-auto">
+              <a href="/resultados/{{ it.id }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-container text-on-primary-container hover:opacity-90 transition-opacity whitespace-nowrap">
+                <span class="material-symbols-outlined text-sm">visibility</span> Ver resultado
+              </a>
+              <a href="/relatorio_pdf/{{ it.id }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container-high text-on-surface hover:bg-outline-variant/40 transition-colors whitespace-nowrap" title="Baixar relatório em PDF">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Imprimir relatório
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if n_solicitados > itens|length %}
+  <div class="bg-tertiary-fixed border border-tertiary-container rounded-lg p-4 text-sm text-on-tertiary-fixed">
+    {{ n_solicitados - itens|length }} base(s) do lote não puderam ser carregadas (o resultado pode não ter sido salvo corretamente).
+  </div>
+  {% endif %}
+
+</div>
+</main>
+</body>
+</html>

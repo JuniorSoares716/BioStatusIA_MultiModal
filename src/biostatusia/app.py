@@ -3,9 +3,11 @@ import zipfile
 from pathlib import Path
 
 import markdown as md
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, Response, jsonify, redirect, render_template, request, url_for
 
 from biostatusia.pipeline.io_utils import (
+    PASTAS_BENIGNAS,
+    PASTAS_MALIGNAS,
     criar_pasta_run,
     eh_dicom,
     eh_imagem,
@@ -124,6 +126,49 @@ def detectar_estrutura(caminho: Path) -> str:
         return "volume_3d" if n_dcm >= 10 else "imagem_dicom_2d"
 
     return "invalido"
+
+
+def detectar_multiplas_bases(caminho: Path) -> list[dict] | None:
+    """
+    Detecta quando `caminho` não é UMA base, mas VÁRIAS bases independentes
+    juntas na mesma pasta (ex.: alguém compactou 10 datasets diferentes num
+    único .zip) — cada subpasta de primeiro nível é testada
+    INDEPENDENTEMENTE; se a maioria já for, sozinha, uma base válida
+    reconhecível, trata como lote em vez de tentar ler tudo junto como um
+    dataset só (o que produz uma mistura sem sentido).
+
+    Não confunde com a convenção benign/malignant (que é parte de UMA base
+    só, não várias bases independentes) nem com uma organização legítima de
+    subpastas dentro de um único dataset multimodal (só dispara quando há
+    3+ subpastas e a maioria delas é uma base válida por si só).
+
+    Retorna None quando não parece um lote de bases — nesse caso, o fluxo
+    normal de detecção de uma única base (`detectar_estrutura`) continua
+    valendo.
+    """
+    if not caminho.is_dir():
+        return None
+
+    subpastas = sorted((d for d in caminho.iterdir() if d.is_dir()), key=lambda d: d.name)
+    if len(subpastas) < 3:
+        return None
+
+    nomes_normalizados = {d.name.lower() for d in subpastas}
+    if nomes_normalizados <= (PASTAS_BENIGNAS | PASTAS_MALIGNAS):
+        return None  # é a convenção de rótulo de UMA base, não várias bases
+
+    bases_validas = []
+    for sub in subpastas:
+        modo_sub = detectar_estrutura(sub)
+        if modo_sub != "invalido":
+            bases_validas.append({"nome": sub.name, "caminho": str(sub), "modo": modo_sub})
+
+    # só considera "lote" se a MAIORIA das subpastas for, cada uma, uma base
+    # válida por conta própria — evita falso positivo em datasets com uma
+    # organização de pastas legítima, mas que não representa bases separadas.
+    if len(bases_validas) >= 2 and len(bases_validas) >= len(subpastas) * 0.6:
+        return bases_validas
+    return None
 
 
 # ── Leitura de artefatos JSON dos agentes ─────────────────────────────────────
@@ -803,6 +848,21 @@ def analisar():
             "exemplo_correto": r"C:\Users\clinica\exames\hoje",
         }), 400
 
+    # 2. Detectar se são MÚLTIPLAS bases independentes juntas (ex.: várias
+    # pastas de dataset compactadas num único .zip) — antes de tentar
+    # detectar o modo de UMA base só, que produziria uma leitura sem
+    # sentido misturando tudo. Só verifica se o usuário ainda não optou
+    # explicitamente por tratar como uma base única (`ignorar_lote`).
+    ignorar_lote = request.form.get("ignorar_lote", "").strip() == "1"
+    if not ignorar_lote:
+        bases_detectadas = detectar_multiplas_bases(base_path)
+        if bases_detectadas:
+            return jsonify({
+                "multiplas_bases": True,
+                "dataset_path": dataset_path,
+                "bases": bases_detectadas,
+            })
+
     modo = detectar_estrutura(base_path)
     if modo == "invalido":
         return jsonify({
@@ -1143,6 +1203,38 @@ def tela2(resultado_id: int):
     )
 
 
+# ── Rota: Resumo de Lote (múltiplas bases processadas de uma vez) ─────────────
+
+@app.route("/lote")
+def lote():
+    """
+    Página de resumo de um lote de análises — cada uma já foi processada
+    de forma totalmente independente pela rota /analisar (mesmo pipeline,
+    mesmas garantias); esta página só lista o que já está salvo, com link
+    para o resultado completo de cada uma.
+    """
+    from biostatusia.database import buscar_resultado
+
+    ids_str = request.args.get("ids", "")
+    ids = [int(i) for i in ids_str.split(",") if i.strip().isdigit()]
+
+    itens = []
+    for rid in ids:
+        dados = buscar_resultado(rid)
+        if dados:
+            pipeline = dados.get("pipeline") or {}
+            itens.append({
+                "id": rid,
+                "nome_base": str(dados.get("dataset_path", "—")).replace("\\", "/").split("/")[-1],
+                "modo": pipeline.get("modo", pipeline.get("familia", "—")),
+                "n_amostras": dados.get("n_imagens", pipeline.get("n_amostras", "—")),
+                "melhor_modelo": dados.get("melhor_modelo", "N/A"),
+                "erro": pipeline.get("erro_classificador") or pipeline.get("erro_classificador_tabular"),
+            })
+
+    return render_template("tela_lote.html", itens=itens, n_solicitados=len(ids))
+
+
 # ── Rota: Página de Histórico de Análises ────────────────────────────────────
 
 @app.route("/historico")
@@ -1152,12 +1244,14 @@ def historico():
 
     resultados = listar_resultados_completo(limite=200)
     total = len(resultados)
-    familias = sorted({r["familia_sinal"] for r in resultados if r["familia_sinal"]})
+    modos_distintos = sorted({
+        r["modo"].replace("_", " ").title() for r in resultados if r["modo"]
+    })
     return render_template(
         "tela3_historico.html",
         resultados=resultados,
         total=total,
-        familias=familias,
+        familias=modos_distintos,
     )
 
 
@@ -1242,6 +1336,39 @@ def laudo_populacional(resultado_id: int):
         "laudo_md": laudo_md,
         "podio": podio,
     })
+
+
+# ── Rota: Relatório Final em PDF (combina todas as abas) ──────────────────────
+
+@app.route("/relatorio_pdf/<int:resultado_id>")
+def relatorio_pdf(resultado_id: int):
+    """
+    Gera e devolve para download um PDF único combinando os dados de todas
+    as abas da tela de resultados (Estatísticas & Biomarcadores,
+    Pré-processamento, AutoML, Fusão Multimodal e Laudo).
+    """
+    from biostatusia.database import buscar_resultado
+    from biostatusia.pipeline.relatorio_pdf import gerar_relatorio_pdf
+
+    dados = buscar_resultado(resultado_id)
+    if not dados:
+        return jsonify({"erro": f"Resultado {resultado_id} não encontrado"}), 404
+
+    try:
+        pdf_bytes = gerar_relatorio_pdf(dados)
+    except Exception as e:
+        app.logger.exception("Falha ao gerar relatório PDF")
+        return jsonify({
+            "erro": True,
+            "mensagem": f"Não foi possível gerar o relatório PDF: {e}",
+        }), 500
+
+    nome_arquivo = f"biostatusia_relatorio_{resultado_id}.pdf"
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{nome_arquivo}"'},
+    )
 
 
 # ── Rota: Laudo de Amostra Avulsa ─────────────────────────────────────────────

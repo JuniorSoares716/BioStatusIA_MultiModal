@@ -151,32 +151,30 @@ def candidatos_coluna_alvo(header: list[str], data: list[list[str]],
     Para cada candidata, devolve a contagem REAL de linhas por classe (no
     dataset inteiro, não só numa amostra) — para o usuário ver exatamente
     quais classes existem e quantas amostras cada uma tem antes de escolher
-    quais usar (o BioStatusIA hoje só treina binário: se a coluna tiver mais
-    de 2 classes, o usuário escolhe exatamente 2 para comparar).
+    quais usar.
 
-    A DETECÇÃO de quais colunas são candidatas usa uma amostra
-    (`n_amostragem_deteccao`) por velocidade; a CONTAGEM de cada candidata
-    aprovada é feita no dataset inteiro, para o número exibido ser exato.
+    Escaneia a base INTEIRA por coluna (não uma amostra do início) — com
+    saída antecipada assim que uma coluna ultrapassa 10 valores distintos,
+    o que mantém isso rápido mesmo em bases largas, já que a maioria das
+    colunas numéricas contínuas estoura o limite nas primeiras linhas. Uma
+    amostra do início sozinha erraria em datasets ORDENADOS por classe
+    (comuns em benchmarks — ex.: MIT-BIH, onde as primeiras ~18 mil linhas
+    são todas de uma única classe e a diversidade só aparece bem mais
+    adiante no arquivo).
     """
-    amostra = data[:n_amostragem_deteccao]
     candidatos = []
     for i, nome in enumerate(header):
-        valores_amostra = [row[i].strip() for row in amostra if i < len(row) and row[i].strip()]
-        if not valores_amostra:
-            continue
-        unicos_amostra = set(valores_amostra)
-        if not (2 <= len(unicos_amostra) <= 10):
-            continue
-
         contagem: dict[str, int] = {}
+        estourou = False
         for row in data:
-            if i < len(row):
+            if i < len(row) and row[i].strip():
                 v = row[i].strip()
-                if v:
-                    contagem[v] = contagem.get(v, 0) + 1
-
-        if not (2 <= len(contagem) <= 10):
-            continue  # a contagem completa pode revelar mais classes que a amostra
+                contagem[v] = contagem.get(v, 0) + 1
+                if len(contagem) > 10:
+                    estourou = True
+                    break
+        if estourou or not (2 <= len(contagem) <= 10):
+            continue
 
         classes_ordenadas = sorted(contagem.items(), key=lambda kv: (-kv[1], kv[0]))
         candidatos.append({
@@ -223,14 +221,45 @@ def detectar_schema(header: list[str], data: list[list[str]],
                 label_idx = i
                 break
 
+        def _cardinalidade_ate(idx: int, limite: int = 10) -> int | None:
+            """Nº de valores únicos da coluna `idx`, escaneando a base
+            inteira — mas com saída antecipada assim que ultrapassa
+            `limite` (a maioria das colunas numéricas contínuas estoura o
+            limite nas primeiras dezenas de linhas, então isso continua
+            rápido mesmo em bases grandes). Devolve None se ultrapassar.
+            Usa a base inteira, não uma amostra do início — necessário
+            porque muitos CSVs de benchmark vêm ORDENADOS por classe (ex.:
+            MIT-BIH: as primeiras ~18 mil linhas são todas de uma única
+            classe; uma amostra pequena do início nunca veria as outras)."""
+            unicos: set[str] = set()
+            for row in data:
+                if idx < len(row) and row[idx].strip():
+                    unicos.add(row[idx].strip())
+                    if len(unicos) > limite:
+                        return None
+            return len(unicos) if unicos else None
+
         if label_idx is None and n_cols > 1:
-            candidatos = [n_cols - 1, 0]  # prioridade: última coluna, depois primeira
-            for idx in candidatos:
-                valores = [row[idx].strip() for row in data[:50] if len(row) >= n_cols]
-                unicos = set(valores)
-                if 2 <= len(unicos) <= 10:
+            for idx in (n_cols - 1, 0):  # prioridade: última coluna, depois primeira
+                card = _cardinalidade_ate(idx)
+                if card is not None and 2 <= card <= 10:
                     label_idx = idx
                     break
+
+        if label_idx is None and n_cols > 1:
+            # Nem nome reconhecido nem primeira/última coluna serviram — a
+            # coluna-alvo real pode estar no meio do arquivo (ex.: dataset
+            # da UCI onde "status" não é a última coluna). Escaneia TODAS as
+            # colunas; se só UMA for uma candidata plausível (2 a 10 valores
+            # únicos), usa ela automaticamente — sem ambiguidade, não
+            # precisa nem passar pelo modal de confirmação. Se houver 2+
+            # candidatas, deixa como está (None) e a checagem de
+            # `candidatos_coluna_alvo()` no portão de confirmação assume,
+            # pedindo para o usuário escolher.
+            candidatas_completas = [i for i in range(n_cols)
+                                    if (c := _cardinalidade_ate(i)) is not None and 2 <= c <= 10]
+            if len(candidatas_completas) == 1:
+                label_idx = candidatas_completas[0]
 
     numeric_cols: list[int] = []
     for i in range(n_cols):

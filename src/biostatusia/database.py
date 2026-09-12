@@ -183,20 +183,31 @@ def listar_resultados() -> list[tuple]:
 
 
 def listar_resultados_completo(limite: int = 30) -> list[dict]:
-    """Retorna metadados completos para popular o seletor de amostra na Aba 4."""
+    """Retorna metadados completos para popular o seletor de amostra na Aba 4
+    e a tabela de Histórico."""
     conn = _get_conn()
     rows = conn.execute(
         """SELECT rp.id, rp.data_hora, rp.dataset_path, rp.n_imagens,
                   rp.melhor_modelo, rp.familia_sinal, rp.sinal_tipo,
-                  a.categoria
+                  a.categoria, rp.pipeline_json
            FROM resultados_pipeline rp
            LEFT JOIN analises a ON a.id = rp.analise_id
            ORDER BY rp.id DESC LIMIT ?""",
         (limite,),
     ).fetchall()
     conn.close()
-    return [
-        {
+
+    resultado = []
+    for r in rows:
+        modo = ""
+        erro = ""
+        try:
+            pipeline = json.loads(r[8]) if r[8] else {}
+            modo = pipeline.get("modo") or pipeline.get("familia") or ""
+            erro = pipeline.get("erro_classificador") or pipeline.get("erro_classificador_tabular") or ""
+        except (json.JSONDecodeError, TypeError):
+            pass
+        resultado.append({
             "id": r[0],
             "data_hora": r[1][:19] if r[1] else "",
             "dataset_path": r[2] or "",
@@ -205,6 +216,7 @@ def listar_resultados_completo(limite: int = 30) -> list[dict]:
             "familia_sinal": r[5] or "",
             "sinal_tipo": r[6] or "",
             "categoria": r[7] or "",
-        }
-        for r in rows
-    ]
+            "modo": modo,
+            "erro": erro,
+        })
+    return resultado

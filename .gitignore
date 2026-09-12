@@ -36,6 +36,7 @@ Thumbs.db
 
 # Banco de dados local
 biostatusia.db
+biostatusia.db-journal
 *.sqlite
 *.sqlite3
 
@@ -47,6 +48,9 @@ models/
 # Uploads e workspaces dos kickoffs
 src/biostatusia/static/uploads/
 src/biostatusia/static/runs/
+
+# Cache de pytest
+.pytest_cache/
 
 # Datasets de teste pesados (apenas o CSV pequeno fica versionado)
 dataset_teste/

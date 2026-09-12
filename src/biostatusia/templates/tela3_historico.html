@@ -49,7 +49,7 @@
 </nav>
 
 <main class="flex-grow pt-24 pb-12 px-6">
-<div class="max-w-7xl mx-auto">
+<div class="max-w-[1680px] mx-auto">
 
   <!-- Ethical Banner -->
   <div class="mb-8 p-4 bg-tertiary-fixed border border-tertiary-container rounded-lg flex gap-3 items-start shadow-sm">
@@ -73,28 +73,36 @@
     <table class="w-full text-sm zebra">
       <thead>
         <tr class="bg-surface-container-high text-on-surface-variant text-left">
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">ID da Análise</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Data</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Dataset</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Nº Amostras</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Família</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Melhor Modelo</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide">Categoria</th>
-          <th class="px-6 py-4 font-semibold text-xs uppercase tracking-wide text-center">Ações</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">ID da Análise</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Data</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Dataset</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Nº Amostras</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Modo</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Tipo de Sinal</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Melhor Modelo</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Categoria</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide">Status</th>
+          <th class="px-4 py-3 font-semibold text-xs uppercase tracking-wide text-center">Ações</th>
         </tr>
       </thead>
       <tbody id="corpo-tabela" style="font-variant-numeric:tabular-nums">
         {% for r in resultados %}
         {% set cat = (r.categoria or '')|upper %}
+        {% set modo_eh_imagem = r.modo in ('imagem_unica', 'dataset_rotulado', 'imagens_soltas') %}
         <tr class="border-t border-outline-variant/40 hover:bg-primary/5 transition-colors">
-          <td class="px-6 py-4 font-semibold text-on-surface whitespace-nowrap">#BIO-{{ '%04d'|format(r.id) }}</td>
-          <td class="px-6 py-4 text-on-surface-variant whitespace-nowrap">{{ r.data_hora|replace('T', ' ') }}</td>
-          <td class="px-6 py-4 text-on-surface">{{ (r.dataset_path or '—').split('/')[-1].split('\\')[-1] or '—' }}</td>
-          <td class="px-6 py-4 text-on-surface-variant">{{ r.n_imagens }}</td>
-          <td class="px-6 py-4 text-on-surface-variant">{{ r.familia_sinal or (r.sinal_tipo or '—') }}</td>
-          <td class="px-6 py-4 font-semibold text-primary">{{ r.melhor_modelo or 'N/A' }}</td>
-          <td class="px-6 py-4">
-            {% if 'MALIG' in cat or 'POSITIV' in cat or 'ABNORM' in cat %}
+          <td class="px-4 py-3 font-semibold text-on-surface whitespace-nowrap">#BIO-{{ '%04d'|format(r.id) }}</td>
+          <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap">{{ r.data_hora|replace('T', ' ') }}</td>
+          <td class="px-4 py-3 text-on-surface">
+            <div class="max-w-[220px] truncate" title="{{ r.dataset_path or '—' }}">{{ (r.dataset_path or '—').split('/')[-1].split('\\')[-1] or '—' }}</div>
+          </td>
+          <td class="px-4 py-3 text-on-surface-variant">{{ r.n_imagens }}</td>
+          <td class="px-4 py-3 text-on-surface-variant">{{ (r.modo or '—')|replace('_', ' ')|title }}</td>
+          <td class="px-4 py-3 text-on-surface-variant">{{ r.sinal_tipo or r.familia_sinal or '—' }}</td>
+          <td class="px-4 py-3 font-semibold text-primary">{{ r.melhor_modelo or 'N/A' }}</td>
+          <td class="px-4 py-3">
+            {% if not modo_eh_imagem %}
+              <span class="text-on-surface-variant/50">—</span>
+            {% elif 'MALIG' in cat or 'POSITIV' in cat or 'ABNORM' in cat %}
               <span class="px-3 py-1 rounded-full text-xs font-bold bg-error-container text-on-error-container">{{ cat }}</span>
             {% elif 'BENIG' in cat or 'NORMAL' in cat or 'NEGATIV' in cat %}
               <span class="px-3 py-1 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">{{ cat }}</span>
@@ -104,10 +112,22 @@
               <span class="text-on-surface-variant/50">—</span>
             {% endif %}
           </td>
-          <td class="px-6 py-4 text-center">
-            <a href="/resultados/{{ r.id }}" class="inline-flex p-2 rounded-full hover:bg-primary/10 text-primary transition-colors" title="Abrir resultado">
-              <span class="material-symbols-outlined">visibility</span>
-            </a>
+          <td class="px-4 py-3 whitespace-nowrap">
+            {% if r.erro %}
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-error-container text-on-error-container" title="{{ r.erro }}">Erro no treino</span>
+            {% else %}
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container">Concluído</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-center">
+            <div class="flex flex-col items-stretch gap-1.5 min-w-[150px]">
+              <a href="/resultados/{{ r.id }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-container text-on-primary-container hover:opacity-90 transition-opacity whitespace-nowrap">
+                <span class="material-symbols-outlined text-sm">visibility</span> Ver resultado
+              </a>
+              <a href="/relatorio_pdf/{{ r.id }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-surface-container-high text-on-surface hover:bg-outline-variant/40 transition-colors whitespace-nowrap" title="Baixar relatório em PDF">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Imprimir relatório
+              </a>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -141,7 +161,7 @@
     </div>
     <div class="bg-surface-container-low border border-outline-variant rounded-xl p-6">
       <div class="flex items-center justify-between mb-2">
-        <p class="text-sm text-on-surface-variant">Famílias Distintas</p>
+        <p class="text-sm text-on-surface-variant">Modos Distintos</p>
         <span class="material-symbols-outlined text-primary">category</span>
       </div>
       <p class="text-4xl font-semibold text-on-surface">{{ familias|length }}</p>

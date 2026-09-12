@@ -472,6 +472,7 @@ sem depender do LLM.
 | `GET` | `/api/historico` | JSON com os últimos resultados |
 | `GET` | `/api/exemplos/<id>` | Exemplos individuais do dataset da análise |
 | `GET` | `/laudo_populacional/<id>` | Laudo populacional determinístico |
+| `GET` | `/relatorio_pdf/<id>` | Baixa o relatório final em PDF, combinando todas as abas |
 | `POST` | `/laudo_amostra` | Laudo de amostra avulsa (upload) ou de análise existente |
 
 ---
@@ -490,6 +491,7 @@ sem depender do LLM.
 | AutoML | scikit-learn (6 modelos) |
 | Balanceamento / Interpretabilidade | imbalanced-learn, SHAP |
 | Planilhas | openpyxl (leitura de `.xlsx`, detecção por conteúdo) |
+| Relatório PDF | reportlab (Platypus) |
 | Banco de dados | SQLite |
 | Gerenciador de pacotes | `uv` |
 | Frontend | HTML5 + Tailwind CSS (CDN), Inter, Material Symbols |

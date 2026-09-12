@@ -1992,3 +1992,44 @@ Testei extensivamente mas não tenho como reproduzir 100% o comportamento de um 
 neste ambiente.
 
 Suíte completa (165 testes) segue limpa, nenhuma regressão.
+
+## 49. Bug real encontrado: "Pular Esta Base" nunca fechava o modal
+
+**Sua pergunta com o print da tela de progresso confirmou exatamente onde procurar.** Reexaminei
+o botão "Pular Esta Base" comparando linha a linha com o botão "Confirmar e Analisar" (que
+funciona corretamente) — e achei a diferença exata:
+
+O botão "Confirmar e Analisar" fecha o modal como a **primeiríssima linha** do seu código:
+```js
+document.getElementById('mm-btn-fundir').onclick = async () => {
+  modalMM.style.display = 'none';   // <- fecha o modal ANTES de qualquer outra coisa
+  ...
+```
+
+O botão "Pular Esta Base" **nunca tinha essa linha** — só resolvia a promise internamente e
+retornava, sem nunca esconder o modal:
+```js
+document.getElementById('mm-btn-nova-base').onclick = () => {
+  if (resolverModalLote) {
+    const resolve = resolverModalLote; resolverModalLote = null;
+    resolve({ sucesso: false, pulado: true });
+    return;   // <- modal continuava com display:flex, travado na tela
+  }
+  ...
+```
+
+Isso explica exatamente o que você viu: o modal ficava **visualmente travado por cima** da tela
+de progresso (que você me mandou no print) — mesmo com o processamento continuando
+corretamente por trás dele. Não era "voltar pra home" de verdade, mas com o modal congelado na
+tela, a experiência ficava confusa/quebrada.
+
+**Correção:** adicionada a mesma linha (`modalMM.style.display = 'none';`) no início do
+tratamento de "pular" no modo lote.
+
+**Testado com um script que verifica o estado da tela IMEDIATAMENTE após o clique** (não só o
+resultado final): confirmei que agora, ao clicar em "Pular Esta Base", o modal fecha na hora
+(`display: none`) e a tela "Processando lote de bases... Base X de N" volta a ficar visível
+(`display: flex`), exatamente como esperado. As chamadas de rede confirmam que a base seguinte
+continua sendo processada normalmente.
+
+Suíte completa (165 testes) segue limpa.

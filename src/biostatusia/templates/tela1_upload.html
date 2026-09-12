@@ -679,6 +679,7 @@
 
     document.getElementById('mm-btn-nova-base').onclick = () => {
       if (resolverModalLote) {
+        modalMM.style.display = 'none';
         const resolve = resolverModalLote; resolverModalLote = null;
         resolve({ sucesso: false, pulado: true });
         return;
